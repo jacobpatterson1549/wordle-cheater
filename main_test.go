@@ -15,7 +15,7 @@ func TestNewWords(t *testing.T) {
 		wantErr bool
 	}{
 		{
-			wantErr: true, // too short (length 0)
+			want: &words{}, // no words
 		},
 		{
 			input:   "tiny", // too short
@@ -42,6 +42,32 @@ func TestNewWords(t *testing.T) {
 		case !reflect.DeepEqual(test.want, got):
 			t.Errorf("test %v: words not equal:\nwanted: %v\ngot:    %v", i, test.want, got)
 		}
+	}
+}
+
+func TestWordsSorted(t *testing.T) {
+	words := words{
+		"abbey": {},
+		"weary": {},
+		"gravy": {},
+	}
+	if want, got := "abbey,gravy,weary", words.sorted(); want != got {
+		t.Errorf("sorted words not equal:\nwanted: %q\ngot:    %q", want, got)
+	}
+}
+
+func TestWordsCopy(t *testing.T) {
+	w := "magic"
+	a := words{
+		w: {},
+	}
+	b := a.copy()
+	if !reflect.DeepEqual(a, *b) {
+		t.Errorf("copied values should be equal:\nwanted: %v\ngot:    %v", a, b)
+	}
+	delete(a, w)
+	if reflect.DeepEqual(a, *b) {
+		t.Errorf("copy should be to a different location in memory, both were %p", &a)
 	}
 }
 

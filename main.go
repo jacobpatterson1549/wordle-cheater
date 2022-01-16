@@ -4,7 +4,6 @@ import (
 	_ "embed"
 	"fmt"
 	"io"
-	"log"
 	"os"
 	"sort"
 	"strings"
@@ -16,26 +15,16 @@ var wordsTextFile string
 func main() {
 	var rw osReadWriter
 	if err := runWordle(rw, wordsTextFile); err != nil {
-		log.Fatalf("running wordle: %v", err)
+		panic(fmt.Errorf("running wordle: %v", err))
 	}
-}
-
-type osReadWriter struct{}
-
-func (rw osReadWriter) Read(p []byte) (n int, err error) {
-	return os.Stdin.Read(p)
-}
-
-func (rw osReadWriter) Write(p []byte) (n int, err error) {
-	return os.Stdout.Write(p)
 }
 
 func runWordle(rw io.ReadWriter, wordsLines string) error {
-	words, err := newWords(wordsLines)
+	allWords, err := newWords(wordsLines)
 	if err != nil {
 		return fmt.Errorf("loading words: %v", err)
 	}
-	fmt.Fprintf(rw, "There are %v legal words\n", len(*words)) // There are 2315 legal words
+	availableWords := allWords.copy()
 
 	fmt.Fprintln(rw, "Running wordle-cheater")
 	fmt.Fprintln(rw, " * Guesses and scores are 5 letters long")
@@ -48,7 +37,7 @@ func runWordle(rw io.ReadWriter, wordsLines string) error {
 
 	var h history
 	for {
-		g, err := newGuess(rw, *words)
+		g, err := newGuess(rw, *allWords)
 		if err != nil {
 			return err
 		}
@@ -65,21 +54,31 @@ func runWordle(rw io.ReadWriter, wordsLines string) error {
 			guess: *g,
 			score: *s,
 		}
-		if err := h.addResult(r, words); err != nil {
+		if err := h.addResult(r, availableWords); err != nil {
 			return err
 		}
 
-		if err := words.scanShowPossible(rw); err != nil {
+		if err := availableWords.scanShowPossible(rw); err != nil {
 			return err
 		}
 	}
 }
 
+type osReadWriter struct{}
+
+func (rw osReadWriter) Read(p []byte) (n int, err error) {
+	return os.Stdin.Read(p)
+}
+
+func (rw osReadWriter) Write(p []byte) (n int, err error) {
+	return os.Stdout.Write(p)
+}
+
 type words map[string]struct{}
 
 func newWords(a string) (*words, error) {
-	lines := strings.Split(a, "\n")
-	words := make(words, len(lines))
+	lines := strings.Fields(a)
+	m := make(words, len(lines))
 	for _, w := range lines {
 		if len(w) != 5 {
 			return nil, fmt.Errorf("wanted all words to be 5 letters long, got %q", w)
@@ -87,14 +86,22 @@ func newWords(a string) (*words, error) {
 		if w != strings.ToLower(w) {
 			return nil, fmt.Errorf("wanted all words to be lowercase, got %q", w)
 		}
-		words[w] = struct{}{}
+		m[w] = struct{}{}
 	}
-	return &words, nil
+	return &m, nil
 }
 
-func (words words) sorted() string {
-	s := make([]string, len(words))
-	for w := range words {
+func (m words) copy() *words {
+	m2 := make(words, len(m))
+	for k, v := range m {
+		m2[k] = v
+	}
+	return &m2
+}
+
+func (m words) sorted() string {
+	s := make([]string, 0, len(m))
+	for w := range m {
 		s = append(s, w)
 	}
 	sort.Strings(s)
@@ -102,7 +109,7 @@ func (words words) sorted() string {
 	return j
 }
 
-func (words words) scanShowPossible(rw io.ReadWriter) error {
+func (m words) scanShowPossible(rw io.ReadWriter) error {
 	fmt.Fprintf(rw, "show possible words [Yn]: ")
 	var choice string
 	if _, err := fmt.Fscan(rw, &choice); err != nil {
@@ -112,13 +119,13 @@ func (words words) scanShowPossible(rw io.ReadWriter) error {
 	if len(choice) > 0 && choice[0] != 'y' {
 		return nil
 	}
-	fmt.Fprintf(rw, "remaining valid words: %v\n", words.sorted())
+	fmt.Fprintf(rw, "remaining valid words: %v\n", m.sorted())
 	return nil
 }
 
 type guess string
 
-func newGuess(rw io.ReadWriter, words words) (*guess, error) {
+func newGuess(rw io.ReadWriter, m words) (*guess, error) {
 	for {
 		fmt.Fprintf(rw, "Enter guess (five letters): ")
 		var word string
@@ -127,7 +134,7 @@ func newGuess(rw io.ReadWriter, words words) (*guess, error) {
 		}
 		word = strings.ToLower(word)
 		g := guess(word)
-		if err := g.validate(words); err != nil {
+		if err := g.validate(m); err != nil {
 			fmt.Fprintf(rw, "%v\n", err)
 			continue
 		}
@@ -135,12 +142,12 @@ func newGuess(rw io.ReadWriter, words words) (*guess, error) {
 	}
 }
 
-func (g guess) validate(words words) error {
+func (g guess) validate(m words) error {
 	if n := 5; len(g) != n {
 		return fmt.Errorf("guess must be %v letters long", n)
 	}
-	if len(words) > 0 {
-		if _, ok := words[string(g)]; !ok {
+	if len(m) > 0 {
+		if _, ok := m[string(g)]; !ok {
 			return fmt.Errorf("%v is not a word", g)
 		}
 	}
@@ -210,7 +217,7 @@ type history struct {
 	prohibitedLetters5 charSet
 }
 
-func (h *history) addResult(r result, words *words) error {
+func (h *history) addResult(r result, m *words) error {
 	if err := r.validate(); err != nil {
 		return fmt.Errorf("adding invalid result to history: %v", err)
 	}
@@ -218,9 +225,9 @@ func (h *history) addResult(r result, words *words) error {
 		return fmt.Errorf("merging score: %v", err)
 	}
 	h.results = append(h.results, r)
-	for w := range *words {
+	for w := range *m {
 		if !h.allows(w) {
-			delete(*words, w)
+			delete(*m, w)
 		}
 	}
 	return nil
