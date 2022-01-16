@@ -333,3 +333,40 @@ func (h *history) allows(w string) bool {
 	}
 	return true
 }
+
+// charSet is a bitflag that stores the letters a-z
+type charSet uint32
+
+// add includes the character to the set, panicing if the character is not in a-z
+func (cs *charSet) add(ch byte) {
+	if !cs.valid(ch) {
+		panic(fmt.Errorf("%c is not in a-z", ch))
+	}
+	(*cs) |= cs.singleton(ch)
+}
+
+// del removes the character from the set
+func (cs *charSet) del(ch byte) {
+	if !cs.valid(ch) {
+		return
+	}
+	(*cs) ^= cs.singleton(ch)
+}
+
+// has determines if the character is in the set
+func (cs charSet) has(ch byte) bool {
+	if !cs.valid(ch) {
+		return false
+	}
+	return (cs & cs.singleton(ch)) != 0
+}
+
+// valid determines if the byte can be used in the charSet, if it is a-z
+func (charSet) valid(ch byte) bool {
+	return 'a' <= ch && ch <= 'z'
+}
+
+// singleton creates a singleton charSet from the character
+func (charSet) singleton(ch byte) charSet {
+	return 1 << (ch - 'a')
+}

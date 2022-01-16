@@ -2,6 +2,7 @@ package main
 
 import (
 	"bufio"
+	"fmt"
 	"reflect"
 	"strings"
 	"testing"
@@ -254,5 +255,39 @@ func TestAddResult(t *testing.T) {
 		t.Errorf("histories not equal:\nwanted: %+v\ngot:    %+v", want, got)
 	case !reflect.DeepEqual(wantWords, gotWords):
 		t.Errorf("words not equal after result added to history:\nwanted: %+v\ngot:    %+v", wantWords, gotWords)
+	}
+}
+
+func TestCharSet(t *testing.T) {
+	var cs charSet
+	for ch := byte('a'); ch <= 'z'; ch++ {
+		if cs.has(ch) {
+			t.Errorf("%c in charSet before it is added", ch)
+		}
+		cs.add(ch)
+		if !cs.has(ch) {
+			t.Errorf("%c not in charSet after it is added", ch)
+		}
+		cs.del(ch)
+		if cs.has(ch) {
+			t.Errorf("%c in charSet after it is removed", ch)
+		}
+	}
+	badChars := []byte{'?', 'A', 'Z', ' ', '!', '`', '{', '\n', 0, 0x7F, 0xFF}
+	for _, ch := range badChars {
+		t.Run(fmt.Sprintf("bad-add-0x%x", ch), func(t *testing.T) {
+			var cs charSet
+			if cs.has(ch) {
+				t.Errorf("bad character 0x%x in charSet", ch)
+			}
+			cs.del(ch)
+			defer func() {
+				r := recover()
+				if _, ok := r.(error); r == nil || !ok {
+					t.Errorf("expected panic error adding bad character")
+				}
+			}()
+			cs.add(ch)
+		})
 	}
 }
