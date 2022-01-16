@@ -242,7 +242,6 @@ func TestHistoryAddResult(t *testing.T) {
 		score: "nannc",
 	}
 	want := history{
-		results:            []result{r},
 		requiredLetters:    []rune{'a', 'y'},
 		prohibitedLetters1: newCharSetHelper(t, 'n', 's', 't'),
 		prohibitedLetters2: newCharSetHelper(t, 'n', 's', 't', 'a'),

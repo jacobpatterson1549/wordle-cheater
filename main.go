@@ -1,3 +1,4 @@
+// Package main runs a command-line-interface program to help cheat in the popular Worlde game
 package main
 
 import (
@@ -12,15 +13,17 @@ import (
 //go:embed build/words.txt
 var wordsTextFile string
 
+// main runs wordle-cheater on the command-line using stdin and stdout
 func main() {
 	var rw osReadWriter
-	if err := runWordle(rw, wordsTextFile); err != nil {
+	if err := runWordleCheater(rw, wordsTextFile); err != nil {
 		panic(fmt.Errorf("running wordle: %v", err))
 	}
 }
 
-func runWordle(rw io.ReadWriter, wordsLines string) error {
-	allWords, err := newWords(wordsLines)
+// runWordleCheater runs an interactive wordle-cheater on the ReaderWriter using the text for the words
+func runWordleCheater(rw io.ReadWriter, wordsText string) error {
+	allWords, err := newWords(wordsText)
 	if err != nil {
 		return fmt.Errorf("loading words: %v", err)
 	}
@@ -64,18 +67,25 @@ func runWordle(rw io.ReadWriter, wordsLines string) error {
 	}
 }
 
+// osReadWriter wraps reading from the standard input and output, satisfying io.ReadWriter
 type osReadWriter struct{}
 
+// Read reads p from stdin
 func (rw osReadWriter) Read(p []byte) (n int, err error) {
 	return os.Stdin.Read(p)
 }
 
+// Write writes p to stdout
 func (rw osReadWriter) Write(p []byte) (n int, err error) {
 	return os.Stdout.Write(p)
 }
 
+// words is a collection of unique strings
 type words map[string]struct{}
 
+// newWords loads the words from the file
+// words are separated by whitespace (spaces/newlines)
+// an error is returned if any words are not 5 characters long and lowercase
 func newWords(a string) (*words, error) {
 	lines := strings.Fields(a)
 	m := make(words, len(lines))
@@ -91,6 +101,7 @@ func newWords(a string) (*words, error) {
 	return &m, nil
 }
 
+// copy creates a new, identical duplication of the words
 func (m words) copy() *words {
 	m2 := make(words, len(m))
 	for k, v := range m {
@@ -99,6 +110,7 @@ func (m words) copy() *words {
 	return &m2
 }
 
+// sorted combines and sorts the words into a csv string
 func (m words) sorted() string {
 	s := make([]string, 0, len(m))
 	for w := range m {
@@ -109,6 +121,7 @@ func (m words) sorted() string {
 	return j
 }
 
+// scanShowPossible prompts to display the words
 func (m words) scanShowPossible(rw io.ReadWriter) error {
 	fmt.Fprintf(rw, "show possible words [Yn]: ")
 	var choice string
@@ -123,8 +136,10 @@ func (m words) scanShowPossible(rw io.ReadWriter) error {
 	return nil
 }
 
+// guess is a word that might be the answer
 type guess string
 
+// newGuess prompts for a guess on the ReadWriter until a valid one is given or an io error occurs
 func newGuess(rw io.ReadWriter, m words) (*guess, error) {
 	for {
 		fmt.Fprintf(rw, "Enter guess (five letters): ")
@@ -142,6 +157,7 @@ func newGuess(rw io.ReadWriter, m words) (*guess, error) {
 	}
 }
 
+// validate ensures the guess is 5 letters long and is in the words list (if a list is provided)
 func (g guess) validate(m words) error {
 	if n := 5; len(g) != n {
 		return fmt.Errorf("guess must be %v letters long", n)
@@ -154,8 +170,13 @@ func (g guess) validate(m words) error {
 	return nil
 }
 
+// score is a 5-letter string made up of {c,a,n}
+// The letter c indicates that a letter from a guess is in the correct position
+// The letter a indicates that a letter from a guess is in the answer, but in a different position
+// The letter n indicates that a letter from a guess is not anywhere in the answer
 type score string
 
+// newScore prompts for a score on the ReadWriter until a valid one is given or an io error occurs
 func newScore(rw io.ReadWriter) (*score, error) {
 	for {
 		fmt.Fprintf(rw, "Enter score: ")
@@ -173,6 +194,7 @@ func newScore(rw io.ReadWriter) (*score, error) {
 	}
 }
 
+// validate ensures the score is 5 letters long and consists only of the {c,a,n} letters
 func (s score) validate() error {
 	if n := 5; len(s) != n {
 		return fmt.Errorf("score must be %v letters long", n)
@@ -188,15 +210,18 @@ func (s score) validate() error {
 	return nil
 }
 
+// allCorrect determines if every character in the score is c
 func (s score) allCorrect() bool {
 	return s == "ccccc"
 }
 
+// result is a guess and it's score
 type result struct {
 	guess guess
 	score score
 }
 
+// validate returns an error if the guess or score is invalid
 func (r result) validate() error {
 	if err := r.guess.validate(nil); err != nil {
 		return fmt.Errorf("validating guess: %v", err)
@@ -207,8 +232,8 @@ func (r result) validate() error {
 	return nil
 }
 
+// history stores the state of multiple results
 type history struct {
-	results            []result
 	requiredLetters    []rune
 	prohibitedLetters1 charSet
 	prohibitedLetters2 charSet
@@ -217,6 +242,7 @@ type history struct {
 	prohibitedLetters5 charSet
 }
 
+// addResult merges the result into the history and trims the words to only include ones that are allowed
 func (h *history) addResult(r result, m *words) error {
 	if err := r.validate(); err != nil {
 		return fmt.Errorf("adding invalid result to history: %v", err)
@@ -224,7 +250,6 @@ func (h *history) addResult(r result, m *words) error {
 	if err := h.mergeResult(r); err != nil {
 		return fmt.Errorf("merging score: %v", err)
 	}
-	h.results = append(h.results, r)
 	for w := range *m {
 		if !h.allows(w) {
 			delete(*m, w)
@@ -233,6 +258,7 @@ func (h *history) addResult(r result, m *words) error {
 	return nil
 }
 
+// mergeResult merges the result into the history
 func (h *history) mergeResult(r result) error {
 	var usedLetters []rune
 	for i, si := range r.score {
@@ -274,6 +300,7 @@ func (h *history) mergeResult(r result) error {
 	return nil
 }
 
+// hasRequiredLetter determines if the first rune is in requiredLetters or any of newRequiredLetters
 func (h history) hasRequiredLetter(r rune, newRequiredLetters ...rune) bool {
 	for _, ch := range h.requiredLetters {
 		if r == ch {
@@ -288,6 +315,9 @@ func (h history) hasRequiredLetter(r rune, newRequiredLetters ...rune) bool {
 	return false
 }
 
+// mergeRequiredLetters adds required letters from a guess into the required letters
+// new letters are only added if they were not previously required
+// an error is returned if too many letters are required
 func (h *history) mergeRequiredLetters(newScoreLetters ...rune) error {
 	existingCounts := letterCounts(h.requiredLetters...)
 	scoreCounts := letterCounts(newScoreLetters...)
@@ -303,6 +333,7 @@ func (h *history) mergeRequiredLetters(newScoreLetters ...rune) error {
 	return nil
 }
 
+// letterCounts creates a count multi-map of the runes (count-set)
 func letterCounts(runes ...rune) map[rune]int {
 	m := make(map[rune]int, len(runes))
 	for _, r := range runes {
@@ -311,6 +342,7 @@ func letterCounts(runes ...rune) map[rune]int {
 	return m
 }
 
+// prohibitedLetters gets the prohibited letters charSet for the index, panicing if the index is not in 0-4
 func (h *history) prohibitedLetters(index int) *charSet {
 	switch index {
 	case 0:
@@ -328,6 +360,7 @@ func (h *history) prohibitedLetters(index int) *charSet {
 	}
 }
 
+// allows determines if a word is allowed based on the history (not prohibited)
 func (h *history) allows(w string) bool {
 	letterCounts := make(map[rune]int, 5)
 	for i, ch := range w {
