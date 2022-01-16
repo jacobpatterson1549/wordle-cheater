@@ -205,25 +205,7 @@ func TestResultValidate(t *testing.T) {
 	}
 }
 
-func TestNewHistory(t *testing.T) {
-	h := newHistory()
-	switch {
-	case h.requiredLetterCounts == nil:
-		t.Errorf("requiredLetterCounts is nil")
-	case h.prohibitedLetters1 == nil:
-		t.Errorf("prohibitedLetters1 is nil")
-	case h.prohibitedLetters2 == nil:
-		t.Errorf("prohibitedLetters2 is nil")
-	case h.prohibitedLetters3 == nil:
-		t.Errorf("prohibitedLetters3 is nil")
-	case h.prohibitedLetters4 == nil:
-		t.Errorf("prohibitedLetters4 is nil")
-	case h.prohibitedLetters5 == nil:
-		t.Errorf("prohibitedLetters5 is nil")
-	}
-}
-
-func TestAddResult(t *testing.T) {
+func TestHistoryAddResult(t *testing.T) {
 	s := []string{"nasty", "alley", "early", "great", "ready", "touch"}
 	allWords := make(words, len(s))
 	for _, w := range s {
@@ -233,20 +215,20 @@ func TestAddResult(t *testing.T) {
 		guess: "nasty",
 		score: "nannc",
 	}
-	want := &history{
-		results:              []result{r},
-		requiredLetterCounts: map[rune]int{'a': 1, 'y': 1},
-		prohibitedLetters1:   map[rune]struct{}{'n': {}, 's': {}, 't': {}},
-		prohibitedLetters2:   map[rune]struct{}{'n': {}, 's': {}, 't': {}, 'a': {}},
-		prohibitedLetters3:   map[rune]struct{}{'n': {}, 's': {}, 't': {}},
-		prohibitedLetters4:   map[rune]struct{}{'n': {}, 's': {}, 't': {}},
-		prohibitedLetters5:   map[rune]struct{}{'a': {}, 'b': {}, 'c': {}, 'd': {}, 'e': {}, 'f': {}, 'g': {}, 'h': {}, 'i': {}, 'j': {}, 'k': {}, 'l': {}, 'm': {}, 'n': {}, 'o': {}, 'p': {}, 'q': {}, 'r': {}, 's': {}, 't': {}, 'u': {}, 'v': {}, 'w': {}, 'x': {}, 'z': {}},
+	want := history{
+		results:            []result{r},
+		requiredLetters:    []rune{'a', 'y'},
+		prohibitedLetters1: newCharSetHelper(t, 'n', 's', 't'),
+		prohibitedLetters2: newCharSetHelper(t, 'n', 's', 't', 'a'),
+		prohibitedLetters3: newCharSetHelper(t, 'n', 's', 't'),
+		prohibitedLetters4: newCharSetHelper(t, 'n', 's', 't'),
+		prohibitedLetters5: newCharSetHelper(t, 'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'z'),
 	}
 	wantWords := words{
 		"alley": {},
 		"ready": {},
 	}
-	h := newHistory()
+	var h history
 	h.addResult(r, &allWords)
 	got := h
 	gotWords := allWords
@@ -258,29 +240,82 @@ func TestAddResult(t *testing.T) {
 	}
 }
 
+func TestHistoryMergeRequiredLetters(t *testing.T) {
+	tests := []struct {
+		history
+		newRequiredLetters []rune
+		want               history
+		wantErr            bool
+	}{
+		{},
+		{
+			newRequiredLetters: []rune{'a', 'b', 'c'},
+			want:               history{requiredLetters: []rune{'a', 'b', 'c'}},
+		},
+		{
+			history:            history{requiredLetters: []rune{'a', 'b'}},
+			newRequiredLetters: []rune{'a', 'a'},
+			want:               history{requiredLetters: []rune{'a', 'b', 'a'}},
+		},
+		{
+			history:            history{requiredLetters: []rune{'a', 'a', 'a'}},
+			newRequiredLetters: []rune{'a', 'a', 'b', 'b', 'c'},
+			wantErr:            true,
+		},
+	}
+	for i, test := range tests {
+		got := test.history
+		err := got.mergeRequiredLetters(test.newRequiredLetters...)
+		switch {
+		case test.wantErr:
+			if err == nil {
+				t.Errorf("test %v: wanted error", i)
+			}
+		case err != nil:
+			t.Errorf("test %v: unwanted error: %v", i, err)
+		case !reflect.DeepEqual(test.want, got):
+			t.Errorf("test %v histories not equal:\nwanted: %v\ngot:    %v", i, test.want, got)
+		}
+	}
+}
+
 func TestCharSet(t *testing.T) {
-	var cs charSet
-	for ch := byte('a'); ch <= 'z'; ch++ {
+	for ch := rune('a'); ch <= 'z'; ch++ {
+		var cs charSet
 		if cs.has(ch) {
 			t.Errorf("%c in charSet before it is added", ch)
 		}
 		cs.add(ch)
+
 		if !cs.has(ch) {
 			t.Errorf("%c not in charSet after it is added", ch)
 		}
-		cs.del(ch)
-		if cs.has(ch) {
-			t.Errorf("%c in charSet after it is removed", ch)
-		}
 	}
-	badChars := []byte{'?', 'A', 'Z', ' ', '!', '`', '{', '\n', 0, 0x7F, 0xFF}
+	t.Run("isFull", func(t *testing.T) {
+		var cs charSet
+		for ch := rune('a'); ch <= 'z'; ch++ {
+			if cs.isFull() {
+				t.Fatalf("charSet is full before adding %v", ch)
+			}
+			cs.add(ch)
+		}
+		if !cs.isFull() {
+			t.Fatalf("wanted charSet to be is full after adding a-z")
+		}
+	})
+	t.Run("Stringer", func(t *testing.T) {
+		cs := newCharSetHelper(t, 'f', 'y', 'r', 'o', 't')
+		if want, got := "[forty]", cs.String(); want != got {
+			t.Errorf("wanted %q, got %q", want, got)
+		}
+	})
+	badChars := []rune{'?', 'A', 'Z', ' ', '!', '`', '{', '\n', 0, 0x7F, 0xFF}
 	for _, ch := range badChars {
 		t.Run(fmt.Sprintf("bad-add-0x%x", ch), func(t *testing.T) {
 			var cs charSet
 			if cs.has(ch) {
 				t.Errorf("bad character 0x%x in charSet", ch)
 			}
-			cs.del(ch)
 			defer func() {
 				r := recover()
 				if _, ok := r.(error); r == nil || !ok {
@@ -290,4 +325,13 @@ func TestCharSet(t *testing.T) {
 			cs.add(ch)
 		})
 	}
+}
+
+func newCharSetHelper(t *testing.T, chars ...rune) charSet {
+	t.Helper()
+	var cs charSet
+	for _, ch := range chars {
+		cs.add(ch)
+	}
+	return cs
 }

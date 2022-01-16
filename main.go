@@ -46,7 +46,7 @@ func runWordle(rw io.ReadWriter, wordsLines string) error {
 	fmt.Fprintln(rw, "The app runs until the correct word is found from a guess with only correct letters.")
 	fmt.Fprintln(rw)
 
-	h := newHistory()
+	var h history
 	for {
 		g, err := newGuess(rw, *words)
 		if err != nil {
@@ -201,25 +201,13 @@ func (r result) validate() error {
 }
 
 type history struct {
-	results              []result
-	requiredLetterCounts map[rune]int
-	prohibitedLetters1   map[rune]struct{}
-	prohibitedLetters2   map[rune]struct{}
-	prohibitedLetters3   map[rune]struct{}
-	prohibitedLetters4   map[rune]struct{}
-	prohibitedLetters5   map[rune]struct{}
-}
-
-func newHistory() *history {
-	h := history{
-		requiredLetterCounts: make(map[rune]int, 5),
-		prohibitedLetters1:   make(map[rune]struct{}, 26),
-		prohibitedLetters2:   make(map[rune]struct{}, 26),
-		prohibitedLetters3:   make(map[rune]struct{}, 26),
-		prohibitedLetters4:   make(map[rune]struct{}, 26),
-		prohibitedLetters5:   make(map[rune]struct{}, 26),
-	}
-	return &h
+	results            []result
+	requiredLetters    []rune
+	prohibitedLetters1 charSet
+	prohibitedLetters2 charSet
+	prohibitedLetters3 charSet
+	prohibitedLetters4 charSet
+	prohibitedLetters5 charSet
 }
 
 func (h *history) addResult(r result, words *words) error {
@@ -239,79 +227,95 @@ func (h *history) addResult(r result, words *words) error {
 }
 
 func (h *history) mergeResult(r result) error {
-	requiredLetterCounts := make(map[rune]int, 5)
+	var usedLetters []rune
 	for i, si := range r.score {
 		gi := rune(r.guess[i])
 		p := h.prohibitedLetters(i)
 		switch si {
 		case 'c':
-			if _, ok := p[gi]; ok {
+			if p.has(gi) {
 				return fmt.Errorf("%c was prohibited at inde %v, but is now supposedly correct", si, i)
 			}
 			for l := 'a'; l <= 'z'; l++ {
 				if l != gi {
-					p[l] = struct{}{}
+					p.add(l)
 				}
 			}
-			requiredLetterCounts[gi]++
+			usedLetters = append(usedLetters, gi)
 		case 'a':
-			p[gi] = struct{}{}
-			if len(p) == 26 {
+			p.add(gi)
+			if p.isFull() {
 				return fmt.Errorf("all letters prohibited at index %v", i)
 			}
-			requiredLetterCounts[gi]++
+			usedLetters = append(usedLetters, gi)
 		case 'n':
-			if _, ok := h.requiredLetterCounts[gi]; ok {
+			if h.hasRequiredLetter(gi, usedLetters...) {
 				return fmt.Errorf("%c was previously required to be in word, but is prohibited", gi)
 			}
 			for j := range r.score {
 				pj := h.prohibitedLetters(j)
-				pj[gi] = struct{}{}
-				if len(pj) == 26 {
+				pj.add(gi)
+				if pj.isFull() {
 					return fmt.Errorf("all letters prohibited at index %v", i)
 				}
 			}
 		}
 	}
-	if err := h.mergeRequiredLetterCounts(requiredLetterCounts); err != nil {
+	if err := h.mergeRequiredLetters(usedLetters...); err != nil {
 		return fmt.Errorf("merging required letters: %v", err)
 	}
 	return nil
 }
 
-func (h *history) mergeRequiredLetterCounts(extraLetterCounts map[rune]int) error {
-	c := 0
-	for ch, n := range h.requiredLetterCounts {
-		if n2, ok := extraLetterCounts[ch]; ok {
-			if n2 > n {
-				extraLetterCounts[ch] = n2 - n
-			} else {
-				delete(extraLetterCounts, ch)
-			}
+func (h history) hasRequiredLetter(r rune, newRequiredLetters ...rune) bool {
+	for _, ch := range h.requiredLetters {
+		if r == ch {
+			return true
 		}
-		c += n
 	}
-	for ch, n := range extraLetterCounts {
-		if c+n > 5 {
-			return fmt.Errorf("more than five letters are now required")
+	for _, ch := range newRequiredLetters {
+		if r == ch {
+			return true
 		}
-		h.requiredLetterCounts[ch] += n
+	}
+	return false
+}
+
+func (h *history) mergeRequiredLetters(newScoreLetters ...rune) error {
+	existingCounts := letterCounts(h.requiredLetters...)
+	scoreCounts := letterCounts(newScoreLetters...)
+	for _, ch := range newScoreLetters {
+		if existingCounts[ch] < scoreCounts[ch] {
+			scoreCounts[ch]--
+			h.requiredLetters = append(h.requiredLetters, ch)
+		}
+	}
+	if len(h.requiredLetters) > 5 {
+		return fmt.Errorf("more than five letters are now required")
 	}
 	return nil
 }
 
-func (h *history) prohibitedLetters(index int) map[rune]struct{} {
+func letterCounts(runes ...rune) map[rune]int {
+	m := make(map[rune]int, len(runes))
+	for _, r := range runes {
+		m[r]++
+	}
+	return m
+}
+
+func (h *history) prohibitedLetters(index int) *charSet {
 	switch index {
 	case 0:
-		return h.prohibitedLetters1
+		return &h.prohibitedLetters1
 	case 1:
-		return h.prohibitedLetters2
+		return &h.prohibitedLetters2
 	case 2:
-		return h.prohibitedLetters3
+		return &h.prohibitedLetters3
 	case 3:
-		return h.prohibitedLetters4
+		return &h.prohibitedLetters4
 	case 4:
-		return h.prohibitedLetters5
+		return &h.prohibitedLetters5
 	default:
 		panic(fmt.Errorf("unknown prohibited letter index: %v", index))
 	}
@@ -320,15 +324,20 @@ func (h *history) prohibitedLetters(index int) map[rune]struct{} {
 func (h *history) allows(w string) bool {
 	letterCounts := make(map[rune]int, 5)
 	for i, ch := range w {
-		p := h.prohibitedLetters(i)
-		if _, ok := p[ch]; ok {
+		if h.prohibitedLetters(i).has(ch) {
 			return false
 		}
 		letterCounts[ch]++
 	}
-	for ch, n := range h.requiredLetterCounts {
-		if n2, ok := letterCounts[ch]; !ok || n < n2 {
-			return false
+	for _, ch := range h.requiredLetters {
+		n, ok := letterCounts[ch]
+		switch {
+		case !ok:
+			return false // required letter not present
+		case n == 1:
+			delete(letterCounts, ch)
+		default:
+			letterCounts[ch]--
 		}
 	}
 	return true
@@ -338,35 +347,45 @@ func (h *history) allows(w string) bool {
 type charSet uint32
 
 // add includes the character to the set, panicing if the character is not in a-z
-func (cs *charSet) add(ch byte) {
+func (cs *charSet) add(ch rune) {
 	if !cs.valid(ch) {
 		panic(fmt.Errorf("%c is not in a-z", ch))
 	}
-	(*cs) |= cs.singleton(ch)
-}
-
-// del removes the character from the set
-func (cs *charSet) del(ch byte) {
-	if !cs.valid(ch) {
-		return
-	}
-	(*cs) ^= cs.singleton(ch)
+	*cs |= cs.singleton(ch)
 }
 
 // has determines if the character is in the set
-func (cs charSet) has(ch byte) bool {
+func (cs charSet) has(ch rune) bool {
 	if !cs.valid(ch) {
 		return false
 	}
 	return (cs & cs.singleton(ch)) != 0
 }
 
+// isFull determines if the charset is filled with the letters a-z
+func (cs charSet) isFull() bool {
+	return cs == cs.singleton('z'+1)-1
+}
+
+// String creates a string of the characters in the set, in ascending order
+func (cs charSet) String() string {
+	var b strings.Builder
+	b.WriteRune('[')
+	for ch := rune('a'); ch <= 'z'; ch++ {
+		if cs.has(ch) {
+			b.WriteRune(ch)
+		}
+	}
+	b.WriteRune(']')
+	return b.String()
+}
+
 // valid determines if the byte can be used in the charSet, if it is a-z
-func (charSet) valid(ch byte) bool {
+func (charSet) valid(ch rune) bool {
 	return 'a' <= ch && ch <= 'z'
 }
 
 // singleton creates a singleton charSet from the character
-func (charSet) singleton(ch byte) charSet {
+func (charSet) singleton(ch rune) charSet {
 	return 1 << (ch - 'a')
 }
