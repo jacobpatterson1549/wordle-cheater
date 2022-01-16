@@ -10,34 +10,12 @@ import (
 	"strings"
 )
 
-//go:embed words.txt
+//go:embed build/words.txt
 var wordsTextFile string
-
-// nasty  nannc
-// ready  naanc
-// early  aannc
-// great  nnaan
-// abbey  ccccc
-/*
-Enter guess (five letters): nasty
-Enter score: nannc
-show possible words [Yn]: y
-remaining valid words: [basic lilac magic sumac iliac havoc antic attic]
-Enter guess (five letters): ready
-Enter score: naanc
-show possible words [Yn]: y
-remaining valid words: [basic lilac magic sumac iliac havoc antic attic]
-Enter guess (five letters): early
-Enter score: aannc
-show possible words [Yn]: y
-remaining valid words: [basic lilac magic sumac iliac havoc antic attic]
-Enter guess (five letters): ^Csignal: interrupt
-
-*/
 
 func main() {
 	var rw osReadWriter
-	if err := runWordle(rw); err != nil {
+	if err := runWordle(rw, wordsTextFile); err != nil {
 		log.Fatalf("running wordle: %v", err)
 	}
 }
@@ -52,8 +30,8 @@ func (rw osReadWriter) Write(p []byte) (n int, err error) {
 	return os.Stdout.Write(p)
 }
 
-func runWordle(rw io.ReadWriter) error {
-	words, err := newWords(wordsTextFile)
+func runWordle(rw io.ReadWriter, wordsLines string) error {
+	words, err := newWords(wordsLines)
 	if err != nil {
 		return fmt.Errorf("loading words: %v", err)
 	}
