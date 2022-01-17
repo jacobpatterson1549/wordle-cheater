@@ -553,11 +553,11 @@ func TestHistoryAllowsWord(t *testing.T) {
 func TestCharSetHas(t *testing.T) {
 	for ch := rune('a'); ch <= 'z'; ch++ {
 		var cs charSet
-		if cs.has(ch) {
+		if cs.Has(ch) {
 			t.Errorf("%c in charSet before it is added", ch)
 		}
-		cs.add(ch)
-		if !cs.has(ch) {
+		cs.Add(ch)
+		if !cs.Has(ch) {
 			t.Errorf("%c not in charSet after it is added", ch)
 		}
 	}
@@ -566,12 +566,12 @@ func TestCharSetHas(t *testing.T) {
 func TestCharSetIsFull(t *testing.T) {
 	var cs charSet
 	for ch := rune('a'); ch <= 'z'; ch++ {
-		if cs.isFull() {
+		if cs.IsFull() {
 			t.Fatalf("charSet is full before adding %v", ch)
 		}
-		cs.add(ch)
+		cs.Add(ch)
 	}
-	if !cs.isFull() {
+	if !cs.IsFull() {
 		t.Fatalf("wanted charSet to be is full after adding a-z")
 	}
 }
@@ -588,7 +588,7 @@ func TestCharSetBadChars(t *testing.T) {
 	for _, ch := range badChars {
 		t.Run(fmt.Sprintf("bad-add-0x%x", ch), func(t *testing.T) {
 			var cs charSet
-			if cs.has(ch) {
+			if cs.Has(ch) {
 				t.Errorf("bad character 0x%x in charSet", ch)
 			}
 			defer func() {
@@ -597,7 +597,7 @@ func TestCharSetBadChars(t *testing.T) {
 					t.Errorf("expected panic error adding bad character")
 				}
 			}()
-			cs.add(ch)
+			cs.Add(ch)
 		})
 	}
 }
@@ -606,7 +606,7 @@ func newCharSetHelper(t *testing.T, chars ...rune) charSet {
 	t.Helper()
 	var cs charSet
 	for _, ch := range chars {
-		cs.add(ch)
+		cs.Add(ch)
 	}
 	return cs
 }

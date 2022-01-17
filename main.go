@@ -264,18 +264,18 @@ func (h *history) mergeResult(r result) error {
 		p := &h.prohibitedLetters[i]
 		switch si {
 		case 'c':
-			if p.has(gi) {
+			if p.Has(gi) {
 				return fmt.Errorf("%c was prohibited at inde %v, but is now supposedly correct", si, i)
 			}
 			for l := 'a'; l <= 'z'; l++ {
 				if l != gi {
-					p.add(l)
+					p.Add(l)
 				}
 			}
 			usedLetters = append(usedLetters, gi)
 		case 'a':
-			p.add(gi)
-			if p.isFull() {
+			p.Add(gi)
+			if p.IsFull() {
 				return fmt.Errorf("all letters prohibited at index %v", i)
 			}
 			usedLetters = append(usedLetters, gi)
@@ -285,8 +285,8 @@ func (h *history) mergeResult(r result) error {
 			}
 			for j := range r.score {
 				pj := &h.prohibitedLetters[j]
-				pj.add(gi)
-				if pj.isFull() {
+				pj.Add(gi)
+				if pj.IsFull() {
 					return fmt.Errorf("all letters prohibited at index %v", i)
 				}
 			}
@@ -347,7 +347,7 @@ func letterCounts(runes ...rune) map[rune]int {
 func (h *history) allows(w string) bool {
 	letterCounts := make(map[rune]int, numLetters)
 	for i, ch := range w {
-		if h.prohibitedLetters[i].has(ch) {
+		if h.prohibitedLetters[i].Has(ch) {
 			return false
 		}
 		letterCounts[ch]++
@@ -369,24 +369,24 @@ func (h *history) allows(w string) bool {
 // charSet is a bitflag that stores the letters a-z
 type charSet uint32
 
-// add includes the character to the set, panicing if the character is not in a-z
-func (cs *charSet) add(ch rune) {
+// Add includes the character to the set, panicing if the character is not in a-z
+func (cs *charSet) Add(ch rune) {
 	if !cs.valid(ch) {
 		panic(fmt.Errorf("%c is not in a-z", ch))
 	}
 	*cs |= cs.singleton(ch)
 }
 
-// has determines if the character is in the set
-func (cs charSet) has(ch rune) bool {
+// Has determines if the character is in the set
+func (cs charSet) Has(ch rune) bool {
 	if !cs.valid(ch) {
 		return false
 	}
 	return (cs & cs.singleton(ch)) != 0
 }
 
-// isFull determines if the charset is filled with the letters a-z
-func (cs charSet) isFull() bool {
+// IsFull determines if the charset is filled with the letters a-z
+func (cs charSet) IsFull() bool {
 	return cs == cs.singleton('z'+1)-1
 }
 
@@ -395,7 +395,7 @@ func (cs charSet) String() string {
 	var b strings.Builder
 	b.WriteRune('[')
 	for ch := rune('a'); ch <= 'z'; ch++ {
-		if cs.has(ch) {
+		if cs.Has(ch) {
 			b.WriteRune(ch)
 		}
 	}
