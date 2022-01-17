@@ -18,7 +18,13 @@ const numLetters = 5
 
 // main runs wordle-cheater on the command-line using stdin and stdout
 func main() {
-	var rw osReadWriter
+	rw := struct {
+		io.Reader
+		io.Writer
+	}{
+		Reader: os.Stdin,
+		Writer: os.Stdout,
+	}
 	if err := runWordleCheater(rw, wordsTextFile); err != nil {
 		panic(fmt.Errorf("running wordle: %v", err))
 	}
@@ -67,19 +73,6 @@ func runWordleCheater(rw io.ReadWriter, wordsText string) error {
 			return err
 		}
 	}
-}
-
-// osReadWriter wraps reading from the standard input and output, satisfying io.ReadWriter
-type osReadWriter struct{}
-
-// Read reads p from stdin
-func (rw osReadWriter) Read(p []byte) (n int, err error) {
-	return os.Stdin.Read(p)
-}
-
-// Write writes p to stdout
-func (rw osReadWriter) Write(p []byte) (n int, err error) {
-	return os.Stdout.Write(p)
 }
 
 // words is a collection of unique strings
