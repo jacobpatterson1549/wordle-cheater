@@ -265,7 +265,7 @@ func (h *history) mergeResult(r result) error {
 		switch si {
 		case 'c':
 			if p.Has(gi) {
-				return fmt.Errorf("%c was prohibited at inde %v, but is now supposedly correct", si, i)
+				return fmt.Errorf("%c was prohibited at index %v, but is now supposedly correct", si, i)
 			}
 			for l := 'a'; l <= 'z'; l++ {
 				if l != gi {
@@ -274,10 +274,10 @@ func (h *history) mergeResult(r result) error {
 			}
 			usedLetters = append(usedLetters, gi)
 		case 'a':
-			p.Add(gi)
-			if p.IsFull() {
+			if p.AddWouldFill(gi) {
 				return fmt.Errorf("all letters prohibited at index %v", i)
 			}
+			p.Add(gi)
 			usedLetters = append(usedLetters, gi)
 		case 'n':
 			if h.hasRequiredLetter(gi, usedLetters...) {
@@ -285,10 +285,10 @@ func (h *history) mergeResult(r result) error {
 			}
 			for j := range r.score {
 				pj := &h.prohibitedLetters[j]
-				pj.Add(gi)
-				if pj.IsFull() {
+				if pj.AddWouldFill(gi) {
 					return fmt.Errorf("all letters prohibited at index %v", i)
 				}
+				pj.Add(gi)
 			}
 		}
 	}
@@ -385,9 +385,12 @@ func (cs charSet) Has(ch rune) bool {
 	return (cs & cs.singleton(ch)) != 0
 }
 
-// IsFull determines if the charset is filled with the letters a-z
-func (cs charSet) IsFull() bool {
-	return cs == cs.singleton('z'+1)-1
+// AddWouldFill determines if the charset is filled with the letters a-z
+func (cs charSet) AddWouldFill(ch rune) bool {
+	if !cs.valid(ch) {
+		return false
+	}
+	return cs|cs.singleton(ch) == cs.singleton('z'+1)-1
 }
 
 // String creates a string of the characters in the set, in ascending order

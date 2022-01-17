@@ -563,16 +563,28 @@ func TestCharSetHas(t *testing.T) {
 	}
 }
 
-func TestCharSetIsFull(t *testing.T) {
-	var cs charSet
-	for ch := rune('a'); ch <= 'z'; ch++ {
-		if cs.IsFull() {
-			t.Fatalf("charSet is full before adding %v", ch)
-		}
-		cs.Add(ch)
+func TestCharSetAddWouldFill(t *testing.T) {
+	tests := []struct {
+		ch            rune
+		existingChars []rune
+		want          bool
+	}{
+		{},
+		{
+			ch:            'f',
+			existingChars: []rune{'a', 'b', 'c', 'd', 'e'},
+		},
+		{
+			ch:            'c',
+			existingChars: []rune{'a', 'b', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z'},
+			want:          true,
+		},
 	}
-	if !cs.IsFull() {
-		t.Fatalf("wanted charSet to be is full after adding a-z")
+	for i, test := range tests {
+		cs := newCharSetHelper(t, test.existingChars...)
+		if want, got := test.want, cs.AddWouldFill(test.ch); want != got {
+			t.Errorf("test %v: addWouldFill not equal: wanted %v, got %v", i, want, got)
+		}
 	}
 }
 
