@@ -261,39 +261,64 @@ func (h *history) mergeResult(r result) error {
 	var usedLetters []rune
 	for i, si := range r.score {
 		gi := rune(r.guess[i])
-		p := &h.prohibitedLetters[i]
 		switch si {
 		case 'c':
-			if p.Has(gi) {
-				return fmt.Errorf("%c was prohibited at index %v, but is now supposedly correct", si, i)
-			}
-			for l := 'a'; l <= 'z'; l++ {
-				if l != gi {
-					p.Add(l)
-				}
+			if err := h.setLetterCorrect(gi, i); err != nil {
+				return err
 			}
 			usedLetters = append(usedLetters, gi)
 		case 'a':
-			if p.AddWouldFill(gi) {
-				return fmt.Errorf("all letters prohibited at index %v", i)
+			if err := h.setLetterAlmost(gi, i); err != nil {
+				return err
 			}
-			p.Add(gi)
 			usedLetters = append(usedLetters, gi)
 		case 'n':
-			if h.hasRequiredLetter(gi, usedLetters...) {
-				return fmt.Errorf("%c was previously required to be in word, but is prohibited", gi)
-			}
-			for j := range r.score {
-				pj := &h.prohibitedLetters[j]
-				if pj.AddWouldFill(gi) {
-					return fmt.Errorf("all letters prohibited at index %v", i)
-				}
-				pj.Add(gi)
+			if err := h.setLetterProhibited(gi, i, usedLetters); err != nil {
+				return err
 			}
 		}
 	}
 	if err := h.mergeRequiredLetters(usedLetters...); err != nil {
 		return fmt.Errorf("merging required letters: %v", err)
+	}
+	return nil
+}
+
+// setLetterCorrect sets the letter at the index to correct
+func (h *history) setLetterCorrect(ch rune, index int) error {
+	p := &h.prohibitedLetters[index]
+	if p.Has(ch) {
+		return fmt.Errorf("%c was prohibited at index %v, but is now supposedly correct", ch, index)
+	}
+	for l := 'a'; l <= 'z'; l++ {
+		if l != ch {
+			p.Add(l)
+		}
+	}
+	return nil
+}
+
+// setLetterAlmost markes the letter as available somewhere else by prohibiting it at the index
+func (h *history) setLetterAlmost(ch rune, index int) error {
+	p := &h.prohibitedLetters[index]
+	if p.AddWouldFill(ch) {
+		return fmt.Errorf("all letters prohibited at index %v", index)
+	}
+	p.Add(ch)
+	return nil
+}
+
+// setLetterProhibited marks the letter as prohibited from all indexes
+func (h *history) setLetterProhibited(ch rune, index int, usedLetters []rune) error {
+	if h.hasRequiredLetter(ch, usedLetters...) {
+		return fmt.Errorf("%c was previously required to be in word, but is prohibited", ch)
+	}
+	for j := 0; j < numLetters; j++ {
+		pj := &h.prohibitedLetters[j]
+		if pj.AddWouldFill(ch) {
+			return fmt.Errorf("all letters prohibited at index %v", index)
+		}
+		pj.Add(ch)
 	}
 	return nil
 }
