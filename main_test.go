@@ -491,7 +491,9 @@ func TestHistoryMergeRequiredLetters(t *testing.T) {
 		want               history
 		wantErr            bool
 	}{
-		{},
+		{
+			want: history{requiredLetters: []rune{}},
+		},
 		{
 			newRequiredLetters: []rune{'a', 'b', 'c'},
 			want:               history{requiredLetters: []rune{'a', 'b', 'c'}},
@@ -514,6 +516,9 @@ func TestHistoryMergeRequiredLetters(t *testing.T) {
 		case test.wantErr:
 			if gotErr == nil {
 				t.Errorf("test %v: wanted error", i)
+			}
+			if len(got.requiredLetters) > numLetters {
+				t.Errorf("test %v: wanted required letters not to be modified to invalid state", i)
 			}
 		case gotErr != nil:
 			t.Errorf("test %v: unwanted error: %v", i, gotErr)

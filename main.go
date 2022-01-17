@@ -317,18 +317,20 @@ func (h history) hasRequiredLetter(r rune, newRequiredLetters ...rune) bool {
 // new letters are only added if they were not previously required
 // an error is returned if too many letters are required
 func (h *history) mergeRequiredLetters(newScoreLetters ...rune) error {
+	requiredLetters := make([]rune, len(h.requiredLetters))
+	copy(requiredLetters, h.requiredLetters)
 	existingCounts := letterCounts(h.requiredLetters...)
 	scoreCounts := letterCounts(newScoreLetters...)
 	for _, ch := range newScoreLetters {
 		if existingCounts[ch] < scoreCounts[ch] {
 			scoreCounts[ch]--
-			h.requiredLetters = append(h.requiredLetters, ch)
+			requiredLetters = append(requiredLetters, ch)
 		}
 	}
-	if len(h.requiredLetters) > numLetters {
+	if len(requiredLetters) > numLetters {
 		return fmt.Errorf("more than five letters are now required")
-		// TODO: ensure sum of counts is <= <<numLetters>
 	}
+	h.requiredLetters = requiredLetters
 	return nil
 }
 
