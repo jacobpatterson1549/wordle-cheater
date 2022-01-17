@@ -81,24 +81,24 @@ func TestNewGuess(t *testing.T) {
 	}{
 		{
 			in:      "happy",
-			wantOut: "Enter guess (five letters): ",
+			wantOut: "Enter guess (5 letters): ",
 			want:    "happy",
 		},
 		{
 			in:       "happy",
-			wantOut:  "Enter guess (five letters): ",
+			wantOut:  "Enter guess (5 letters): ",
 			allWords: map[string]struct{}{"happy": {}},
 			want:     "happy",
 		},
 		{
 			in:       "HAPPY",
-			wantOut:  "Enter guess (five letters): ",
+			wantOut:  "Enter guess (5 letters): ",
 			allWords: map[string]struct{}{"happy": {}},
 			want:     "happy",
 		},
 		{
 			in:       "tiny error happy",
-			wantOut:  "Enter guess (five letters): guess must be 5 letters long\nEnter guess (five letters): error is not a word\nEnter guess (five letters): ",
+			wantOut:  "Enter guess (5 letters): guess must be 5 letters long\nEnter guess (5 letters): error is not a word\nEnter guess (5 letters): ",
 			allWords: map[string]struct{}{"happy": {}},
 			want:     "happy",
 		},
@@ -242,12 +242,14 @@ func TestHistoryAddResult(t *testing.T) {
 		score: "nannc",
 	}
 	want := history{
-		requiredLetters:    []rune{'a', 'y'},
-		prohibitedLetters1: newCharSetHelper(t, 'n', 's', 't'),
-		prohibitedLetters2: newCharSetHelper(t, 'n', 's', 't', 'a'),
-		prohibitedLetters3: newCharSetHelper(t, 'n', 's', 't'),
-		prohibitedLetters4: newCharSetHelper(t, 'n', 's', 't'),
-		prohibitedLetters5: newCharSetHelper(t, 'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'z'),
+		requiredLetters: []rune{'a', 'y'},
+		prohibitedLetters: [numLetters]charSet{
+			newCharSetHelper(t, 'n', 's', 't'),
+			newCharSetHelper(t, 'n', 's', 't', 'a'),
+			newCharSetHelper(t, 'n', 's', 't'),
+			newCharSetHelper(t, 'n', 's', 't'),
+			newCharSetHelper(t, 'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'z'),
+		},
 	}
 	wantWords := words{
 		"alley": {},
