@@ -9,7 +9,6 @@ import (
 )
 
 func TestRunWordleCheater(t *testing.T) {
-
 	tests := []struct {
 		readTokens string
 		wordsText  string
@@ -53,10 +52,10 @@ func TestRunWordleCheater(t *testing.T) {
 		switch {
 		case test.wantErr:
 			if gotErr == nil {
-				t.Errorf("test %v: wanted error", i)
+				t.Errorf("test %v: wanted error running wordle cheater", i)
 			}
 		case gotErr != nil:
-			t.Errorf("test %v: unwanted error", i)
+			t.Errorf("test %v: unwanted error runnig wordle cheater", i)
 		}
 	}
 }
@@ -88,10 +87,10 @@ func TestNewWords(t *testing.T) {
 		switch {
 		case test.wantErr:
 			if gotErr == nil {
-				t.Errorf("test %v: wanted error", i)
+				t.Errorf("test %v: wanted error creating words", i)
 			}
 		case gotErr != nil:
-			t.Errorf("test %v: unwanted error: %v", i, gotErr)
+			t.Errorf("test %v: unwanted error creating words: %v", i, gotErr)
 		case !reflect.DeepEqual(test.want, got):
 			t.Errorf("test %v: words not equal:\nwanted: %v\ngot:    %v", i, test.want, got)
 		}
@@ -160,17 +159,18 @@ func TestWordsScanShowPossible(t *testing.T) {
 		switch {
 		case test.wantErr:
 			if gotErr == nil {
-				t.Errorf("test %v: wanted error", i)
+				t.Errorf("test %v: wanted error scanning to show possible words", i)
 			}
 		case gotErr != nil:
-			t.Errorf("test %v: unwanted error: %v", i, gotErr)
+			t.Errorf("test %v: unwanted error scanning to show possible words: %v", i, gotErr)
 		case test.wantOut != buf.String():
-			t.Errorf("test %v: outputs not equal:\nwanted: %q\ngot:    %q", i, test.wantOut, buf.String())
+			t.Errorf("test %v: outputs not equal for possible words:\nwanted: %q\ngot:    %q", i, test.wantOut, buf.String())
 		}
 	}
 }
 
 func TestNewGuess(t *testing.T) {
+	simpleOut := "Enter guess (5 letters): "
 	tests := []struct {
 		in       string
 		wantOut  string
@@ -183,18 +183,18 @@ func TestNewGuess(t *testing.T) {
 		},
 		{
 			in:      "happy",
-			wantOut: "Enter guess (5 letters): ",
+			wantOut: simpleOut,
 			want:    "happy",
 		},
 		{
 			in:       "happy",
-			wantOut:  "Enter guess (5 letters): ",
+			wantOut:  simpleOut,
 			allWords: map[string]struct{}{"happy": {}},
 			want:     "happy",
 		},
 		{
 			in:       "HAPPY",
-			wantOut:  "Enter guess (5 letters): ",
+			wantOut:  simpleOut,
 			allWords: map[string]struct{}{"happy": {}},
 			want:     "happy",
 		},
@@ -216,14 +216,14 @@ func TestNewGuess(t *testing.T) {
 		switch {
 		case test.wantErr:
 			if gotErr == nil {
-				t.Errorf("test %v: wanted error", i)
+				t.Errorf("test %v: wanted error creating guess", i)
 			}
 		case gotErr != nil:
-			t.Errorf("test %v: unwanted error: %v", i, gotErr)
+			t.Errorf("test %v: unwanted error creating guess: %v", i, gotErr)
 		case test.want != *got:
 			t.Errorf("test %v: guesses not equal:\nwanted: %v\ngot:    %v", i, test.want, *got)
 		case test.wantOut != buf.String():
-			t.Errorf("test %v: outputs not equal:\nwanted: %q\ngot:    %q", i, test.wantOut, buf.String())
+			t.Errorf("test %v: outputs not equal creating guess:\nwanted: %q\ngot:    %q", i, test.wantOut, buf.String())
 		}
 	}
 }
@@ -265,14 +265,14 @@ func TestNewScore(t *testing.T) {
 		switch {
 		case test.wantErr:
 			if gotErr == nil {
-				t.Errorf("test %v: wanted error", i)
+				t.Errorf("test %v: wanted error creating score", i)
 			}
 		case gotErr != nil:
-			t.Errorf("test %v: unwanted error: %v", i, gotErr)
+			t.Errorf("test %v: unwanted error creating score: %v", i, gotErr)
 		case test.want != *got:
 			t.Errorf("test %v: scores not equal:\nwanted: %v\ngot:    %v", i, test.want, *got)
 		case test.wantOut != buf.String():
-			t.Errorf("test %v: outputs not equal:\nwanted: %q\ngot:    %q", i, test.wantOut, buf.String())
+			t.Errorf("test %v: new score outputs not equal:\nwanted: %q\ngot:    %q", i, test.wantOut, buf.String())
 		}
 	}
 }
@@ -404,7 +404,7 @@ func TestHistoryMergeResult(t *testing.T) {
 					},
 				},
 				result: result{
-					guess: "apple",
+					guess: "alter",
 					score: "annnn", // all letters prohibited for first letter
 				},
 			},
@@ -414,17 +414,17 @@ func TestHistoryMergeResult(t *testing.T) {
 				},
 				result: result{
 					guess: "apple",
-					score: "nnnnn", // 'a' was required
+					score: "nannc", // 'a' was required
 				},
 			},
 			{
 				history: history{
 					prohibitedLetters: [numLetters]charSet{
-						0: newCharSetHelper(t, 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z'),
+						0: newCharSetHelper(t, 'a', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z'),
 					},
 				},
 				result: result{
-					guess: "apple",
+					guess: "berry",
 					score: "nnnnn", // all letters prohibited for first letter
 				},
 			},
@@ -515,13 +515,13 @@ func TestHistoryMergeRequiredLetters(t *testing.T) {
 		switch {
 		case test.wantErr:
 			if gotErr == nil {
-				t.Errorf("test %v: wanted error", i)
+				t.Errorf("test %v: wanted error merging required letters", i)
 			}
 			if len(got.requiredLetters) > numLetters {
 				t.Errorf("test %v: wanted required letters not to be modified to invalid state", i)
 			}
 		case gotErr != nil:
-			t.Errorf("test %v: unwanted error: %v", i, gotErr)
+			t.Errorf("test %v: unwanted error merging required letters: %v", i, gotErr)
 		case !reflect.DeepEqual(test.want, got):
 			t.Errorf("test %v histories not equal:\nwanted: %v\ngot:    %v", i, test.want, got)
 		}
@@ -550,7 +550,7 @@ func TestHistoryAllowsWord(t *testing.T) {
 	}
 }
 
-func TestCharSet(t *testing.T) {
+func TestCharSetHas(t *testing.T) {
 	for ch := rune('a'); ch <= 'z'; ch++ {
 		var cs charSet
 		if cs.has(ch) {
@@ -561,24 +561,29 @@ func TestCharSet(t *testing.T) {
 			t.Errorf("%c not in charSet after it is added", ch)
 		}
 	}
-	t.Run("isFull", func(t *testing.T) {
-		var cs charSet
-		for ch := rune('a'); ch <= 'z'; ch++ {
-			if cs.isFull() {
-				t.Fatalf("charSet is full before adding %v", ch)
-			}
-			cs.add(ch)
+}
+
+func TestCharSetIsFull(t *testing.T) {
+	var cs charSet
+	for ch := rune('a'); ch <= 'z'; ch++ {
+		if cs.isFull() {
+			t.Fatalf("charSet is full before adding %v", ch)
 		}
-		if !cs.isFull() {
-			t.Fatalf("wanted charSet to be is full after adding a-z")
-		}
-	})
-	t.Run("Stringer", func(t *testing.T) {
-		cs := newCharSetHelper(t, 'f', 'y', 'r', 'o', 't')
-		if want, got := "[forty]", cs.String(); want != got {
-			t.Errorf("wanted %q, got %q", want, got)
-		}
-	})
+		cs.add(ch)
+	}
+	if !cs.isFull() {
+		t.Fatalf("wanted charSet to be is full after adding a-z")
+	}
+}
+
+func TestCharSetString(t *testing.T) {
+	cs := newCharSetHelper(t, 'f', 'y', 'r', 'o', 't')
+	if want, got := "[forty]", cs.String(); want != got {
+		t.Errorf("wanted %q, got %q", want, got)
+	}
+}
+
+func TestCharSetBadChars(t *testing.T) {
 	badChars := []rune{'?', 'A', 'Z', ' ', '!', '`', '{', '\n', 0, 0x7F, 0xFF}
 	for _, ch := range badChars {
 		t.Run(fmt.Sprintf("bad-add-0x%x", ch), func(t *testing.T) {
