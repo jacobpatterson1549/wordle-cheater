@@ -5,6 +5,7 @@ BUILD_DIR := build
 COVERAGE_OBJ := coverage.out
 WORDS_OBJ := words.txt
 SRC := *.go
+GO_ARGS :=
 
 all: $(BUILD_DIR)/$(OBJ)
 
@@ -23,7 +24,7 @@ $(BUILD_DIR):
 	mkdir -p $@
 
 $(BUILD_DIR)/$(OBJ): $(BUILD_DIR)/$(COVERAGE_OBJ) | $(BUILD_DIR)
-	go build -o $@
+	$(GO_ARGS) go build -o $@
 
 $(BUILD_DIR)/$(COVERAGE_OBJ): $(SRC) $(BUILD_DIR)/$(WORDS_OBJ) | $(BUILD_DIR)
 	go test ./... -coverprofile=$@
