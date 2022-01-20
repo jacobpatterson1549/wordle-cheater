@@ -353,13 +353,16 @@ func TestHistoryAddResult(t *testing.T) {
 		score: "nannc",
 	}
 	want := history{
-		requiredLetters: []rune{'a', 'y'},
+		correctLetters: [numLetters]rune{
+			4: 'y',
+		},
+		almostLetters: []rune{'a', 'y'},
 		prohibitedLetters: [numLetters]charSet{
 			newCharSetHelper(t, 'n', 's', 't'),
 			newCharSetHelper(t, 'n', 's', 't', 'a'),
 			newCharSetHelper(t, 'n', 's', 't'),
 			newCharSetHelper(t, 'n', 's', 't'),
-			newCharSetHelper(t, 'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'z'),
+			newCharSetHelper(t, 'n', 's', 't'),
 		},
 	}
 	wantWords := words{
@@ -380,105 +383,50 @@ func TestHistoryAddResult(t *testing.T) {
 	}
 }
 
-func TestHistoryMergeResultIinvalidMerges(t *testing.T) {
-	tests := []struct {
-		history
-		result
-	}{
-		{
-			history: history{
-				prohibitedLetters: [numLetters]charSet{
-					0: newCharSetHelper(t, 'a'),
-				},
-			},
-			result: result{
-				guess: "apple",
-				score: "cnnna", // 'a' was prohibited as the first letter
-			},
+func TestHistoryMergeResultLastLetter(t *testing.T) {
+	var h history
+	r := result{
+		guess: "treat",
+		score: "nannc",
+	}
+	gotErr := h.mergeResult(r)
+	got := h
+	want := history{
+		correctLetters: [numLetters]rune{
+			4: 't',
 		},
-		{
-			history: history{
-				prohibitedLetters: [numLetters]charSet{
-					0: newCharSetHelper(t, 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z'),
-				},
-			},
-			result: result{
-				guess: "alter",
-				score: "annnn", // all letters prohibited for first letter
-			},
-		},
-		{
-			history: history{
-				requiredLetters: []rune{'a'},
-			},
-			result: result{
-				guess: "apple",
-				score: "nannc", // 'a' was required
-			},
-		},
-		{
-			history: history{
-				prohibitedLetters: [numLetters]charSet{
-					0: newCharSetHelper(t, 'a', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z'),
-				},
-			},
-			result: result{
-				guess: "berry",
-				score: "nnnnn", // all letters prohibited for first letter
-			},
-		},
-		{
-			history: history{
-				requiredLetters: []rune{'a', 'b', 'c', 'd'},
-			},
-			result: result{
-				guess: "apple",
-				score: "cnnac", // too many letters are now required
-			},
+		almostLetters: []rune{'r', 't'},
+		prohibitedLetters: [numLetters]charSet{
+			newCharSetHelper(t, 't', 'e', 'a'),
+			newCharSetHelper(t, 't', 'e', 'a', 'r'),
+			newCharSetHelper(t, 't', 'e', 'a'),
+			newCharSetHelper(t, 't', 'e', 'a'),
+			newCharSetHelper(t, 't', 'e', 'a'),
 		},
 	}
-	for i, test := range tests {
-		if gotErr := test.history.mergeResult(test.result); gotErr == nil {
-			t.Errorf("test %v: wanted error for invalid merge", i)
-		}
+	switch {
+	case gotErr != nil:
+		t.Errorf("unwanted error merging history: %v", gotErr)
+	case !reflect.DeepEqual(want, got):
+		t.Errorf("histories not equal:\nwanted: %+v\ngot:    %+v", want, got)
 	}
 }
 
-func TestHistoryHasRequiredLetter(t *testing.T) {
-	tests := []struct {
-		history
-		letter          rune
-		newScoreLetters []rune
-		want            bool
-	}{
-		{
-			letter:  'a',
-			history: history{requiredLetters: []rune{'b', 'a', 't'}},
-			want:    true,
+func TestString(t *testing.T) {
+	h := history{
+		correctLetters: [numLetters]rune{
+			4: 'q',
 		},
-		{
-			letter:          'a',
-			history:         history{requiredLetters: []rune{'b', 'a', 't'}},
-			newScoreLetters: []rune{'z'},
-			want:            true,
-		},
-		{
-			letter:          'o',
-			history:         history{requiredLetters: []rune{'a', 't'}},
-			newScoreLetters: []rune{'z', 'o', 'o'},
-			want:            true,
-		},
-		{
-			letter:          'r',
-			history:         history{requiredLetters: []rune{'t'}},
-			newScoreLetters: []rune{'x'},
-			want:            false,
+		almostLetters: []rune{'c', 'a', 'b'},
+		prohibitedLetters: [numLetters]charSet{
+			1: newCharSetHelper(t, 'z', 'e', 'r'),
+			2: newCharSetHelper(t, 'z', 'x', 'a'),
 		},
 	}
-	for i, test := range tests {
-		if want, got := test.want, test.history.hasRequiredLetter(test.letter, test.newScoreLetters...); want != got {
-			t.Errorf("test %v: wanted %v, got %v", i, want, got)
-		}
+	want := `{correctLetters:????q almostLetters:[c a b] prohibitedLetters:[[] [erz] [axz] [] []]}`
+	got := fmt.Sprintf("%+v", h)
+	if want != got {
+		t.Errorf("history Strings not equal:\nwanted: %+v\ngot:    %+v", want, got)
 	}
 }
 
@@ -490,32 +438,32 @@ func TestHistoryMergeRequiredLetters(t *testing.T) {
 		wantErr            bool
 	}{
 		{
-			want: history{requiredLetters: []rune{}},
+			want: history{almostLetters: []rune{}},
 		},
 		{
 			newRequiredLetters: []rune{'a', 'b', 'c'},
-			want:               history{requiredLetters: []rune{'a', 'b', 'c'}},
+			want:               history{almostLetters: []rune{'a', 'b', 'c'}},
 		},
 		{
-			history:            history{requiredLetters: []rune{'a', 'b'}},
+			history:            history{almostLetters: []rune{'a', 'b'}},
 			newRequiredLetters: []rune{'a', 'a'},
-			want:               history{requiredLetters: []rune{'a', 'b', 'a'}},
+			want:               history{almostLetters: []rune{'a', 'b', 'a'}},
 		},
 		{
-			history:            history{requiredLetters: []rune{'a', 'a', 'a'}},
+			history:            history{almostLetters: []rune{'a', 'a', 'a'}},
 			newRequiredLetters: []rune{'a', 'a', 'b', 'b', 'c'},
 			wantErr:            true,
 		},
 	}
 	for i, test := range tests {
 		got := test.history
-		gotErr := got.mergeRequiredLetters(test.newRequiredLetters...)
+		gotErr := got.mergeRequiredLetters(test.newRequiredLetters)
 		switch {
 		case test.wantErr:
 			if gotErr == nil {
 				t.Errorf("test %v: wanted error merging required letters", i)
 			}
-			if len(got.requiredLetters) > numLetters {
+			if len(got.almostLetters) > numLetters {
 				t.Errorf("test %v: wanted required letters not to be modified to invalid state", i)
 			}
 		case gotErr != nil:
@@ -527,25 +475,59 @@ func TestHistoryMergeRequiredLetters(t *testing.T) {
 }
 
 func TestHistoryAllowsWord(t *testing.T) {
-	tests := []struct {
-		word string
-		want bool
-	}{
-		{"batty", true},
-		{"fatty", false},
-		{"party", false},
-	}
-	for i, test := range tests {
-		h := history{
-			requiredLetters: []rune{'t', 'a', 't'},
-			prohibitedLetters: [numLetters]charSet{
-				0: newCharSetHelper(t, 'f'),
+	t.Run("empty-correct", func(t *testing.T) {
+		tests := []struct {
+			word string
+			want bool
+		}{
+			{"batty", true},
+			{"fatty", false},
+			{"party", false},
+		}
+		for i, test := range tests {
+			h := history{
+				almostLetters: []rune{'t', 'a', 't'},
+				prohibitedLetters: [numLetters]charSet{
+					0: newCharSetHelper(t, 'f'),
+				},
+			}
+			if want, got := test.want, h.allows(test.word); want != got {
+				t.Errorf("test %v (shared history): wanted %v, got %v", i, want, got)
+			}
+		}
+	})
+	t.Run("custom-histories", func(t *testing.T) {
+		tests := []struct {
+			history
+			word string
+			want bool
+		}{
+			{
+				// result{guess:"treat",score:"nannc"}
+				history: history{
+					correctLetters: [numLetters]rune{
+						4: 't',
+					},
+					almostLetters: []rune{'r', 't'},
+					prohibitedLetters: [numLetters]charSet{
+						newCharSetHelper(t, 't', 'e', 'a'),
+						newCharSetHelper(t, 't', 'e', 'a', 'r'),
+						newCharSetHelper(t, 't', 'e', 'a'),
+						newCharSetHelper(t, 't', 'e', 'a'),
+						newCharSetHelper(t, 't', 'e', 'a'),
+					},
+				},
+				word: "robot",
+				want: true,
 			},
 		}
-		if want, got := test.want, h.allows(test.word); want != got {
-			t.Errorf("test %v: wanted %v, got %v", i, want, got)
+		for i, test := range tests {
+			if want, got := test.want, test.history.allows(test.word); want != got {
+				t.Errorf("test %v (with custom history): wanted %v, got %v", i, want, got)
+			}
 		}
-	}
+
+	})
 }
 
 func TestCharSetHas(t *testing.T) {

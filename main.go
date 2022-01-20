@@ -229,7 +229,8 @@ func (r result) validate() error {
 
 // history stores the state of multiple results
 type history struct {
-	requiredLetters   []rune
+	correctLetters    [numLetters]rune
+	almostLetters     []rune
 	prohibitedLetters [numLetters]charSet
 }
 
@@ -256,90 +257,49 @@ func (h *history) mergeResult(r result) error {
 		gi := rune(r.guess[i])
 		switch si {
 		case 'c':
-			if err := h.setLetterCorrect(gi, i); err != nil {
-				return err
-			}
+			h.setLetterCorrect(gi, i)
 			usedLetters = append(usedLetters, gi)
 		case 'a':
-			if err := h.setLetterAlmost(gi, i); err != nil {
-				return err
-			}
+			h.setLetterAlmost(gi, i)
 			usedLetters = append(usedLetters, gi)
 		case 'n':
-			if err := h.setLetterProhibited(gi, i, usedLetters); err != nil {
-				return err
-			}
+			h.setLetterProhibited(gi, i, usedLetters)
 		}
 	}
-	if err := h.mergeRequiredLetters(usedLetters...); err != nil {
+	if err := h.mergeRequiredLetters(usedLetters); err != nil {
 		return fmt.Errorf("merging required letters: %v", err)
 	}
 	return nil
 }
 
 // setLetterCorrect sets the letter at the index to correct
-func (h *history) setLetterCorrect(ch rune, index int) error {
-	p := &h.prohibitedLetters[index]
-	if p.Has(ch) {
-		return fmt.Errorf("%c was prohibited at index %v, but is now supposedly correct", ch, index)
-	}
-	for l := 'a'; l <= 'z'; l++ {
-		if l != ch {
-			p.Add(l)
-		}
-	}
-	return nil
+func (h *history) setLetterCorrect(ch rune, index int) {
+	h.correctLetters[index] = ch
 }
 
 // setLetterAlmost markes the letter as available somewhere else by prohibiting it at the index
-func (h *history) setLetterAlmost(ch rune, index int) error {
+func (h *history) setLetterAlmost(ch rune, index int) {
 	p := &h.prohibitedLetters[index]
-	if p.AddWouldFill(ch) {
-		return fmt.Errorf("all letters prohibited at index %v", index)
-	}
 	p.Add(ch)
-	return nil
 }
 
 // setLetterProhibited marks the letter as prohibited from all indexes
-func (h *history) setLetterProhibited(ch rune, index int, usedLetters []rune) error {
-	if h.hasRequiredLetter(ch, usedLetters...) {
-		return fmt.Errorf("%c was previously required to be in word, but is prohibited", ch)
-	}
+func (h *history) setLetterProhibited(ch rune, index int, usedLetters []rune) {
 	for j := 0; j < numLetters; j++ {
 		pj := &h.prohibitedLetters[j]
-		if pj.AddWouldFill(ch) {
-			return fmt.Errorf("all letters prohibited at index %v", index)
-		}
 		pj.Add(ch)
 	}
-	return nil
-}
-
-// hasRequiredLetter determines if the first rune is in requiredLetters or any of newRequiredLetters
-func (h history) hasRequiredLetter(r rune, newRequiredLetters ...rune) bool {
-	for _, ch := range h.requiredLetters {
-		if r == ch {
-			return true
-		}
-	}
-	for _, ch := range newRequiredLetters {
-		if r == ch {
-			return true
-		}
-	}
-	return false
 }
 
 // mergeRequiredLetters adds required letters from a guess into the required letters
 // new letters are only added if they were not previously required
 // an error is returned if too many letters are required
-func (h *history) mergeRequiredLetters(newScoreLetters ...rune) error {
-	requiredLetters := make([]rune, len(h.requiredLetters))
-	copy(requiredLetters, h.requiredLetters)
-	existingCounts := letterCounts(h.requiredLetters...)
-	scoreCounts := letterCounts(newScoreLetters...)
-	for _, ch := range newScoreLetters {
+func (h *history) mergeRequiredLetters(usedLetters []rune) error {
+	requiredLetters := make([]rune, len(h.almostLetters))
+	copy(requiredLetters, h.almostLetters)
+	existingCounts := letterCounts(h.almostLetters...)
+	scoreCounts := letterCounts(usedLetters...)
+	for _, ch := range usedLetters {
 		if existingCounts[ch] < scoreCounts[ch] {
 			scoreCounts[ch]--
 			requiredLetters = append(requiredLetters, ch)
@@ -348,7 +308,7 @@ func (h *history) mergeRequiredLetters(newScoreLetters ...rune) error {
 	if len(requiredLetters) > numLetters {
 		return fmt.Errorf("more than five letters are now required")
 	}
-	h.requiredLetters = requiredLetters
+	h.almostLetters = requiredLetters
 	return nil
 }
 
@@ -365,12 +325,12 @@ func letterCounts(runes ...rune) map[rune]int {
 func (h *history) allows(w string) bool {
 	letterCounts := make(map[rune]int, numLetters)
 	for i, ch := range w {
-		if h.prohibitedLetters[i].Has(ch) {
+		if ch != h.correctLetters[i] && h.prohibitedLetters[i].Has(ch) {
 			return false
 		}
 		letterCounts[ch]++
 	}
-	for _, ch := range h.requiredLetters {
+	for _, ch := range h.almostLetters {
 		n, ok := letterCounts[ch]
 		switch {
 		case !ok:
@@ -382,6 +342,37 @@ func (h *history) allows(w string) bool {
 		}
 	}
 	return true
+}
+
+// String formats the required and prohibed letters to clearly show the state
+func (h history) String() string {
+	correct := make([]rune, len(h.correctLetters))
+	for i, ch := range h.correctLetters {
+		switch {
+		case ch == 0:
+			correct[i] = '?'
+		default:
+			correct[i] = ch
+		}
+	}
+	almost := make([]string, len(h.almostLetters))
+	for i, ch := range h.almostLetters {
+		almost[i] = string(ch)
+	}
+	prohibited := make([]string, len(h.prohibitedLetters))
+	for i, cs := range h.prohibitedLetters {
+		prohibited[i] = cs.String()
+	}
+	a := struct {
+		correctLetters    string
+		almostLetters     []string
+		prohibitedLetters []string
+	}{
+		string(correct),
+		almost,
+		prohibited,
+	}
+	return fmt.Sprintf("%+v", a)
 }
 
 // charSet is a bitflag that stores the letters a-z
