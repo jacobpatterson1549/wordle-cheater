@@ -380,70 +380,68 @@ func TestHistoryAddResult(t *testing.T) {
 	}
 }
 
-func TestHistoryMergeResult(t *testing.T) {
-	t.Run("invalid-merges", func(t *testing.T) {
-		tests := []struct {
-			history
-			result
-		}{
-			{
-				history: history{
-					prohibitedLetters: [numLetters]charSet{
-						0: newCharSetHelper(t, 'a'),
-					},
-				},
-				result: result{
-					guess: "apple",
-					score: "cnnna", // 'a' was prohibited as the first letter
+func TestHistoryMergeResultIinvalidMerges(t *testing.T) {
+	tests := []struct {
+		history
+		result
+	}{
+		{
+			history: history{
+				prohibitedLetters: [numLetters]charSet{
+					0: newCharSetHelper(t, 'a'),
 				},
 			},
-			{
-				history: history{
-					prohibitedLetters: [numLetters]charSet{
-						0: newCharSetHelper(t, 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z'),
-					},
-				},
-				result: result{
-					guess: "alter",
-					score: "annnn", // all letters prohibited for first letter
+			result: result{
+				guess: "apple",
+				score: "cnnna", // 'a' was prohibited as the first letter
+			},
+		},
+		{
+			history: history{
+				prohibitedLetters: [numLetters]charSet{
+					0: newCharSetHelper(t, 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z'),
 				},
 			},
-			{
-				history: history{
-					requiredLetters: []rune{'a'},
-				},
-				result: result{
-					guess: "apple",
-					score: "nannc", // 'a' was required
+			result: result{
+				guess: "alter",
+				score: "annnn", // all letters prohibited for first letter
+			},
+		},
+		{
+			history: history{
+				requiredLetters: []rune{'a'},
+			},
+			result: result{
+				guess: "apple",
+				score: "nannc", // 'a' was required
+			},
+		},
+		{
+			history: history{
+				prohibitedLetters: [numLetters]charSet{
+					0: newCharSetHelper(t, 'a', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z'),
 				},
 			},
-			{
-				history: history{
-					prohibitedLetters: [numLetters]charSet{
-						0: newCharSetHelper(t, 'a', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z'),
-					},
-				},
-				result: result{
-					guess: "berry",
-					score: "nnnnn", // all letters prohibited for first letter
-				},
+			result: result{
+				guess: "berry",
+				score: "nnnnn", // all letters prohibited for first letter
 			},
-			{
-				history: history{
-					requiredLetters: []rune{'a', 'b', 'c', 'd'},
-				},
-				result: result{
-					guess: "apple",
-					score: "cnnac", // too many letters are now required
-				},
+		},
+		{
+			history: history{
+				requiredLetters: []rune{'a', 'b', 'c', 'd'},
 			},
+			result: result{
+				guess: "apple",
+				score: "cnnac", // too many letters are now required
+			},
+		},
+	}
+	for i, test := range tests {
+		if gotErr := test.history.mergeResult(test.result); gotErr == nil {
+			t.Errorf("test %v: wanted error for invalid merge", i)
 		}
-		for i, test := range tests {
-			if gotErr := test.history.mergeResult(test.result); gotErr == nil {
-				t.Errorf("test %v: wanted error for invalid merge", i)
-			}
-		}
-	})
+	}
 }
 
 func TestHistoryHasRequiredLetter(t *testing.T) {
