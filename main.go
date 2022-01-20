@@ -65,9 +65,7 @@ func runWordleCheater(rw io.ReadWriter, wordsText string) error {
 			guess: *g,
 			score: *s,
 		}
-		if err := h.addResult(r, availableWords); err != nil {
-			return err
-		}
+		h.addResult(r, availableWords)
 
 		if err := availableWords.scanShowPossible(rw); err != nil {
 			return err
@@ -216,17 +214,6 @@ type result struct {
 	score score
 }
 
-// validate returns an error if the guess or score is invalid
-func (r result) validate() error {
-	if err := r.guess.validate(nil); err != nil {
-		return fmt.Errorf("validating guess: %v", err)
-	}
-	if err := r.score.validate(); err != nil {
-		return fmt.Errorf("validating score: %v", err)
-	}
-	return nil
-}
-
 // history stores the state of multiple results
 type history struct {
 	correctLetters    [numLetters]rune
@@ -235,23 +222,17 @@ type history struct {
 }
 
 // addResult merges the result into the history and trims the words to only include ones that are allowed
-func (h *history) addResult(r result, m *words) error {
-	if err := r.validate(); err != nil {
-		return fmt.Errorf("adding invalid result to history: %v", err)
-	}
-	if err := h.mergeResult(r); err != nil {
-		return fmt.Errorf("merging score: %v", err)
-	}
+func (h *history) addResult(r result, m *words) {
+	h.mergeResult(r)
 	for w := range *m {
 		if !h.allows(w) {
 			delete(*m, w)
 		}
 	}
-	return nil
 }
 
 // mergeResult merges the result into the history
-func (h *history) mergeResult(r result) error {
+func (h *history) mergeResult(r result) {
 	var usedLetters []rune
 	for i, si := range r.score {
 		gi := rune(r.guess[i])
@@ -266,10 +247,7 @@ func (h *history) mergeResult(r result) error {
 			h.setLetterProhibited(gi, i, usedLetters)
 		}
 	}
-	if err := h.mergeRequiredLetters(usedLetters); err != nil {
-		return fmt.Errorf("merging required letters: %v", err)
-	}
-	return nil
+	h.mergeRequiredLetters(usedLetters)
 }
 
 // setLetterCorrect sets the letter at the index to correct
@@ -293,8 +271,7 @@ func (h *history) setLetterProhibited(ch rune, index int, usedLetters []rune) {
 
 // mergeRequiredLetters adds required letters from a guess into the required letters
 // new letters are only added if they were not previously required
-// an error is returned if too many letters are required
-func (h *history) mergeRequiredLetters(usedLetters []rune) error {
+func (h *history) mergeRequiredLetters(usedLetters []rune) {
 	requiredLetters := make([]rune, len(h.almostLetters))
 	copy(requiredLetters, h.almostLetters)
 	existingCounts := letterCounts(h.almostLetters...)
@@ -305,11 +282,7 @@ func (h *history) mergeRequiredLetters(usedLetters []rune) error {
 			requiredLetters = append(requiredLetters, ch)
 		}
 	}
-	if len(requiredLetters) > numLetters {
-		return fmt.Errorf("more than five letters are now required")
-	}
 	h.almostLetters = requiredLetters
-	return nil
 }
 
 // letterCounts creates a count multi-map of the runes (count-set)

@@ -300,48 +300,6 @@ func TestScoreAllCorrect(t *testing.T) {
 	}
 }
 
-func TestResultValidate(t *testing.T) {
-	tests := []struct {
-		result
-		wantErr bool
-	}{
-		{
-			result: result{
-				guess: "tiny",
-				score: "ccccc",
-			},
-			wantErr: true,
-		},
-		{
-			result: result{
-				guess: "large",
-				score: "n",
-			},
-			wantErr: true,
-		},
-		{
-			result: result{
-				guess: "happy",
-				score: "cannc",
-			},
-		},
-	}
-	for i, test := range tests {
-		gotErr := test.result.validate()
-		if want, got := test.wantErr, gotErr != nil; want != got {
-			t.Errorf("test %v: validated values not equal: wanted error: %v, got error: %v (%v)", i, want, got, gotErr)
-		}
-	}
-}
-
-func TestHistoryAddResultInvalid(t *testing.T) {
-	var h history
-	var r result
-	if gotErr := h.addResult(r, nil); gotErr == nil {
-		t.Errorf("wanted error adding invalid result")
-	}
-}
-
 func TestHistoryAddResult(t *testing.T) {
 	s := []string{"nasty", "alley", "early", "great", "ready", "touch"}
 	allWords := make(words, len(s))
@@ -370,12 +328,10 @@ func TestHistoryAddResult(t *testing.T) {
 		"ready": {},
 	}
 	var h history
-	gotErr := h.addResult(r, &allWords)
 	got := h
+	got.addResult(r, &allWords)
 	gotWords := allWords
 	switch {
-	case gotErr != nil:
-		t.Errorf("unwanted error: %v", gotErr)
 	case !reflect.DeepEqual(want, got):
 		t.Errorf("histories not equal:\nwanted: %+v\ngot:    %+v", want, got)
 	case !reflect.DeepEqual(wantWords, gotWords):
@@ -383,14 +339,14 @@ func TestHistoryAddResult(t *testing.T) {
 	}
 }
 
-func TestHistoryMergeResultLastLetter(t *testing.T) {
+func TestHistoryMergeResult(t *testing.T) {
 	var h history
 	r := result{
 		guess: "treat",
 		score: "nannc",
 	}
-	gotErr := h.mergeResult(r)
 	got := h
+	got.mergeResult(r)
 	want := history{
 		correctLetters: [numLetters]rune{
 			4: 't',
@@ -404,10 +360,7 @@ func TestHistoryMergeResultLastLetter(t *testing.T) {
 			newCharSetHelper(t, 't', 'e', 'a'),
 		},
 	}
-	switch {
-	case gotErr != nil:
-		t.Errorf("unwanted error merging history: %v", gotErr)
-	case !reflect.DeepEqual(want, got):
+	if !reflect.DeepEqual(want, got) {
 		t.Errorf("histories not equal:\nwanted: %+v\ngot:    %+v", want, got)
 	}
 }
@@ -435,7 +388,6 @@ func TestHistoryMergeRequiredLetters(t *testing.T) {
 		history
 		newRequiredLetters []rune
 		want               history
-		wantErr            bool
 	}{
 		{
 			want: history{almostLetters: []rune{}},
@@ -452,23 +404,13 @@ func TestHistoryMergeRequiredLetters(t *testing.T) {
 		{
 			history:            history{almostLetters: []rune{'a', 'a', 'a'}},
 			newRequiredLetters: []rune{'a', 'a', 'b', 'b', 'c'},
-			wantErr:            true,
+			want:               history{almostLetters: []rune{'a', 'a', 'a', 'b', 'b', 'c'}}, // this will prohibit all words
 		},
 	}
 	for i, test := range tests {
 		got := test.history
-		gotErr := got.mergeRequiredLetters(test.newRequiredLetters)
-		switch {
-		case test.wantErr:
-			if gotErr == nil {
-				t.Errorf("test %v: wanted error merging required letters", i)
-			}
-			if len(got.almostLetters) > numLetters {
-				t.Errorf("test %v: wanted required letters not to be modified to invalid state", i)
-			}
-		case gotErr != nil:
-			t.Errorf("test %v: unwanted error merging required letters: %v", i, gotErr)
-		case !reflect.DeepEqual(test.want, got):
+		got.mergeRequiredLetters(test.newRequiredLetters)
+		if !reflect.DeepEqual(test.want, got) {
 			t.Errorf("test %v histories not equal:\nwanted: %v\ngot:    %v", i, test.want, got)
 		}
 	}
