@@ -81,6 +81,10 @@ func TestNewWords(t *testing.T) {
 			input:   "APPLE", // uppercase
 			wantErr: true,
 		},
+		{
+			input: "extra\nbreak\nvalid\n\n",
+			want:  &words{"extra": {}, "break": {}, "valid": {}},
+		},
 	}
 	for i, test := range tests {
 		got, gotErr := newWords(test.input)
