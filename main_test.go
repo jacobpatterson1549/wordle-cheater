@@ -2,7 +2,6 @@ package main
 
 import (
 	"bufio"
-	"fmt"
 	"reflect"
 	"strings"
 	"testing"
@@ -381,7 +380,7 @@ func TestString(t *testing.T) {
 		},
 	}
 	want := `{correctLetters:????q almostLetters:[c a b] prohibitedLetters:[[] [erz] [axz] [] []]}`
-	got := fmt.Sprintf("%+v", h)
+	got := h.String()
 	if want != got {
 		t.Errorf("history Strings not equal:\nwanted: %+v\ngot:    %+v", want, got)
 	}
@@ -522,9 +521,9 @@ func TestCharSetString(t *testing.T) {
 }
 
 func TestCharSetBadChars(t *testing.T) {
-	badChars := []rune{'?', 'A', 'Z', ' ', '!', '`', '{', '\n', 0, 0x7F, 0xFF}
-	for _, ch := range badChars {
-		t.Run(fmt.Sprintf("bad-add-0x%x", ch), func(t *testing.T) {
+	badChars := []rune{'?', 'A', 'Z', ' ', '!', '`', '\n', 0, 0x7F, 0xFF}
+	for i, ch := range badChars {
+		t.Run("bad-add-#"+string(rune('0'+i)), func(t *testing.T) {
 			var cs charSet
 			if cs.Has(ch) {
 				t.Errorf("bad character 0x%x in charSet", ch)
