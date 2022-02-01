@@ -299,7 +299,9 @@ func letterCounts(runes ...rune) map[rune]int {
 func (h *history) allows(w string) bool {
 	letterCounts := make(map[rune]int, numLetters)
 	for i, ch := range w {
-		if ch != h.correctLetters[i] && h.prohibitedLetters[i].Has(ch) {
+		switch {
+		case h.correctLetters[i] != 0 && h.correctLetters[i] != ch,
+			h.correctLetters[i] == 0 && h.prohibitedLetters[i].Has(ch):
 			return false
 		}
 		letterCounts[ch]++
