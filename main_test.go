@@ -353,28 +353,41 @@ func TestHistoryAddResult(t *testing.T) {
 }
 
 func TestHistoryMergeResult(t *testing.T) {
-	var h history
-	r := result{
-		guess: "treat",
-		score: "nannc",
-	}
-	got := h
-	got.mergeResult(r)
-	want := history{
-		correctLetters: [numLetters]rune{
-			4: 't',
+	tests := []struct {
+		history
+		guess
+		score
+		want history
+	}{
+		{
+			guess: "treat",
+			score: "nannc",
+			want: history{
+				correctLetters: [numLetters]rune{
+					4: 't',
+				},
+				almostLetters: []rune{'r', 't'},
+				prohibitedLetters: [numLetters]charSet{
+					newCharSetHelper(t, 't', 'e', 'a'),
+					newCharSetHelper(t, 't', 'e', 'a', 'r'),
+					newCharSetHelper(t, 't', 'e', 'a'),
+					newCharSetHelper(t, 't', 'e', 'a'),
+					newCharSetHelper(t, 't', 'e', 'a'),
+				},
+			},
 		},
-		almostLetters: []rune{'r', 't'},
-		prohibitedLetters: [numLetters]charSet{
-			newCharSetHelper(t, 't', 'e', 'a'),
-			newCharSetHelper(t, 't', 'e', 'a', 'r'),
-			newCharSetHelper(t, 't', 'e', 'a'),
-			newCharSetHelper(t, 't', 'e', 'a'),
-			newCharSetHelper(t, 't', 'e', 'a'),
-		},
 	}
-	if !reflect.DeepEqual(want, got) {
-		t.Errorf("histories not equal:\nwanted: %+v\ngot:    %+v", want, got)
+	for i, test := range tests {
+		r := result{
+			guess: test.guess,
+			score: test.score,
+		}
+		want := test.want
+		got := test.history
+		got.mergeResult(r)
+		if !reflect.DeepEqual(want, got) {
+			t.Errorf("test %v (for guess %q): histories not equal:\nwanted: %+v\ngot:    %+v", i, test.guess, want, got)
+		}
 	}
 }
 
