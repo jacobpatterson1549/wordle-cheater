@@ -118,11 +118,12 @@ func (m words) sorted() string {
 func (m words) scanShowPossible(rw io.ReadWriter) error {
 	fmt.Fprintf(rw, "show possible words [Yn]: ")
 	var choice string
-	if _, err := fmt.Fscan(rw, &choice); err != nil {
+	n, err := fmt.Fscanf(rw, "%s", &choice)
+	if err == io.EOF || (n != 0 && err != nil) {
 		return fmt.Errorf("scanning choice: %v", err)
 	}
 	choice = strings.ToLower(choice)
-	if len(choice) > 0 && choice[0] != 'y' {
+	if n != 0 && len(choice) > 0 && choice[0] == 'n' {
 		return nil
 	}
 	fmt.Fprintf(rw, "remaining valid words: %v\n", m.sorted())

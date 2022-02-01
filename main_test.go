@@ -142,13 +142,23 @@ func TestWordsScanShowPossible(t *testing.T) {
 		},
 		{
 			words:   words{"apple": {}, "berry": {}, "cakes": {}},
-			in:      "NAH",
+			in:      "NAH", // uppercase n is ok
 			wantOut: "show possible words [Yn]: ",
 		},
 		{
 			words:   words{"apple": {}, "berry": {}, "cakes": {}},
-			in:      "yes",
+			in:      "yes\n",
 			wantOut: "show possible words [Yn]: remaining valid words: apple,berry,cakes\n",
+		},
+		{
+			words:   words{"apple":{}},
+			in:      "\n", // user presses enter key (choosing default: Y)
+			wantOut: "show possible words [Yn]: remaining valid words: apple\n",
+		},
+		{
+			words:   words{"apple":{}},
+			in:      "hmmm... no", // first word must be no
+			wantOut: "show possible words [Yn]: remaining valid words: apple\n",
 		},
 	}
 	for i, test := range tests {
