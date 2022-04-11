@@ -38,7 +38,7 @@ func TestRunWordleCheater(t *testing.T) {
 		},
 		{
 			readTokens: "apple ncccc n berry ncccc",
-			wantErr:    true, // to mainy required letters
+			wantErr:    true, // too many required letters
 		},
 	}
 	for i, test := range tests {
@@ -54,7 +54,7 @@ func TestRunWordleCheater(t *testing.T) {
 				t.Errorf("test %v: wanted error running wordle cheater", i)
 			}
 		case gotErr != nil:
-			t.Errorf("test %v: unwanted error runnig wordle cheater", i)
+			t.Errorf("test %v: unwanted error runing wordle cheater", i)
 		}
 	}
 }

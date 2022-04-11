@@ -1,4 +1,4 @@
-// Package main runs a command-line-interface program to help cheat in the popular Worlde game
+// Package main runs a command-line-interface program to help cheat in the popular Wordle game
 package main
 
 import (
@@ -76,9 +76,9 @@ func runWordleCheater(rw io.ReadWriter, wordsText string) error {
 // words is a collection of unique strings
 type words map[string]struct{}
 
-// newWords loads the words from the file
-// words are separated by whitespace (spaces/newlines)
-// an error is returned if any words are not <<numLetters characters long and lowercase
+// newWords loads the words from the file.
+// Words are separated by whitespace (spaces/newlines).
+// An error is returned if any words are not <<numLetters characters long and lowercase.
 func newWords(a string) (*words, error) {
 	lines := strings.Fields(a)
 	m := make(words, len(lines))
@@ -164,10 +164,10 @@ func (g guess) validate(m words) error {
 	return nil
 }
 
-// score is a <<numLetters>>-letter string made up of {c,a,n}
-// The letter c indicates that a letter from a guess is in the correct position
-// The letter a indicates that a letter from a guess is in the answer, but in a different position
-// The letter n indicates that a letter from a guess is not anywhere in the answer
+// score is a <<numLetters>>-letter string made up of {c,a,n}.
+// * The letter c indicates that a letter from a guess is in the correct position.
+// * The letter a indicates that a letter from a guess is in the answer, but in a different position.
+// * The letter n indicates that a letter from a guess is not anywhere in the answer.
 type score string
 
 // newScore prompts for a score on the ReadWriter until a valid one is given or an io error occurs
@@ -256,7 +256,7 @@ func (h *history) setLetterCorrect(ch rune, index int) {
 	h.correctLetters[index] = ch
 }
 
-// setLetterAlmost markes the letter as available somewhere else by prohibiting it at the index
+// setLetterAlmost marks the letter as available somewhere else by prohibiting it at the index
 func (h *history) setLetterAlmost(ch rune, index int) {
 	p := &h.prohibitedLetters[index]
 	p.Add(ch)
@@ -270,8 +270,8 @@ func (h *history) setLetterProhibited(ch rune, index int, usedLetters []rune) {
 	}
 }
 
-// mergeRequiredLetters adds required letters from a guess into the required letters
-// new letters are only added if they were not previously required
+// mergeRequiredLetters adds required letters from a guess into the required letters.
+// New letters are only added if they were not previously required.
 func (h *history) mergeRequiredLetters(usedLetters []rune) {
 	requiredLetters := make([]rune, len(h.almostLetters))
 	copy(requiredLetters, h.almostLetters)
@@ -320,7 +320,7 @@ func (h *history) allows(w string) bool {
 	return true
 }
 
-// String formats the required and prohibed letters to clearly show the state
+// String formats the required and prohibited letters to clearly show the state
 func (h history) String() string {
 	correct := make([]rune, len(h.correctLetters))
 	for i, ch := range h.correctLetters {
