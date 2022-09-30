@@ -188,7 +188,7 @@ func newScore(rw io.ReadWriter) (*score, error) {
 	}
 }
 
-// validate ensures the score is <<numLeters>> letters long and consists only of the {c,a,n} letters
+// validate ensures the score is <<numLetters>> letters long and consists only of the {c,a,n} letters
 func (s score) validate() error {
 	if len(s) != numLetters {
 		return fmt.Errorf("score must be %v letters long", numLetters)
@@ -351,10 +351,10 @@ func (h history) String() string {
 	return fmt.Sprintf("%+v", a)
 }
 
-// charSet is a bitflag that stores the letters a-z
+// charSet is a bit field that stores the letters a-z
 type charSet uint32
 
-// Add includes the character to the set, panicing if the character is not in a-z
+// Add includes the character to the set.  Panics if the character is not in a-z
 func (cs *charSet) Add(ch rune) {
 	if !cs.valid(ch) {
 		panic(fmt.Errorf("%c is not in a-z", ch))

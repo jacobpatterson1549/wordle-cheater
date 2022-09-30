@@ -15,4 +15,4 @@ It runs until a correct guess, with a score of "ccccc" is entered.
 
 The command `make run` executes the application in a terminal.  This generates the word list, tests the code, and runs the command-line-interface application in the terminal.  The application runs until the correct guess is entered or control-c is pressed.
 
-To build the application to be run on other operating systems/architectures, set the GO_ARGS flag when running `make`.  An examlpe of this is `make GO_ARGS="GOOS=windows GOARCH=amd64" OBJ="wordle-cheater.exe"`.  This builds `build/wordle-cheater.exe`, a version of the application that runs on 64-bit versions of Windows.  To list available architectures, run `go tool dist list` to display GOOS/GOARCH combinations.
+To build the application to be run on other operating systems/architectures, set the GO_ARGS flag when running `make`.  An example of this is `make GO_ARGS="GOOS=windows GOARCH=amd64" OBJ="wordle-cheater.exe"`.  This builds `build/wordle-cheater.exe`, a version of the application that runs on 64-bit versions of Windows.  To list available architectures, run `go tool dist list` to display GOOS/GOARCH combinations.
