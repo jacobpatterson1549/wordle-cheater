@@ -151,12 +151,12 @@ func TestWordsScanShowPossible(t *testing.T) {
 			wantOut: "show possible words [Yn]: remaining valid words: apple,berry,cakes\n",
 		},
 		{
-			words:   words{"apple":{}},
+			words:   words{"apple": {}},
 			in:      "\n", // user presses enter key (choosing default: Y)
 			wantOut: "show possible words [Yn]: remaining valid words: apple\n",
 		},
 		{
-			words:   words{"apple":{}},
+			words:   words{"apple": {}},
 			in:      "hmmm... no", // first word must be no
 			wantOut: "show possible words [Yn]: remaining valid words: apple\n",
 		},
@@ -307,7 +307,7 @@ func TestScoreAllCorrect(t *testing.T) {
 		},
 	}
 	for i, test := range tests {
-		if want, got := test.want, test.score.allCorrect(); want != got {
+		if want, got := test.want, test.score == allCorrect; want != got {
 			t.Errorf("test %v: allCorrect values not equal for %q: wanted %v, got %v", i, test.score, want, got)
 		}
 	}

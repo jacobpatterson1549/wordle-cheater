@@ -16,6 +16,13 @@ var wordsTextFile string
 // numLetters is the length of the words
 const numLetters = 5
 
+// init ensures the program is set up properly
+func init() {
+	if err := allCorrect.validate(); err != nil {
+		panic(fmt.Errorf("all correct string is not valid: %v", err))
+	}
+}
+
 // main runs wordle-cheater on the command-line using stdin and stdout
 func main() {
 	rw := struct {
@@ -57,7 +64,7 @@ func runWordleCheater(rw io.ReadWriter, wordsText string) error {
 		if err != nil {
 			return err
 		}
-		if s.allCorrect() {
+		if *s == allCorrect {
 			return nil
 		}
 
@@ -170,6 +177,8 @@ func (g guess) validate(m words) error {
 // * The letter n indicates that a letter from a guess is not anywhere in the answer.
 type score string
 
+const allCorrect score = "ccccc"
+
 // newScore prompts for a score on the ReadWriter until a valid one is given or an io error occurs
 func newScore(rw io.ReadWriter) (*score, error) {
 	for {
@@ -202,11 +211,6 @@ func (s score) validate() error {
 		}
 	}
 	return nil
-}
-
-// allCorrect determines if every character in the score is c
-func (s score) allCorrect() bool {
-	return s == "ccccc"
 }
 
 // result is a guess and it's score
