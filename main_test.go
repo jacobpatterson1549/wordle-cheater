@@ -54,7 +54,7 @@ func TestRunWordleCheater(t *testing.T) {
 				t.Errorf("test %v: wanted error running wordle cheater", i)
 			}
 		case gotErr != nil:
-			t.Errorf("test %v: unwanted error runing wordle cheater", i)
+			t.Errorf("test %v: unwanted error running wordle cheater", i)
 		}
 	}
 }
