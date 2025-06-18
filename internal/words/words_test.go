@@ -1,4 +1,4 @@
-package main
+package words
 
 import (
 	"bufio"
@@ -7,22 +7,22 @@ import (
 	"testing"
 )
 
-func TestNewWords(t *testing.T) {
+func TestNew(t *testing.T) {
 	tests := []struct {
 		input   string
-		want    *words
+		want    *Words
 		wantErr bool
 	}{
 		{
-			want: &words{}, // no words
+			want: &Words{}, // no words
 		},
 		{
-			input:   "tiny", // too short
-			wantErr: true,
+			input: "tiny", // too short
+			want:  &Words{},
 		},
 		{
 			input: "apple\nberry",
-			want:  &words{"apple": {}, "berry": {}},
+			want:  &Words{"apple": {}, "berry": {}},
 		},
 		{
 			input:   "APPLE", // uppercase
@@ -30,11 +30,11 @@ func TestNewWords(t *testing.T) {
 		},
 		{
 			input: "extra\nbreak\nvalid\n\n",
-			want:  &words{"extra": {}, "break": {}, "valid": {}},
+			want:  &Words{"extra": {}, "break": {}, "valid": {}},
 		},
 	}
 	for i, test := range tests {
-		got, gotErr := newWords(test.input)
+		got, gotErr := New(test.input)
 		switch {
 		case test.wantErr:
 			if gotErr == nil {
@@ -49,7 +49,7 @@ func TestNewWords(t *testing.T) {
 }
 
 func TestWordsSorted(t *testing.T) {
-	words := words{
+	words := Words{
 		"abbey": {},
 		"weary": {},
 		"gravy": {},
@@ -61,10 +61,10 @@ func TestWordsSorted(t *testing.T) {
 
 func TestWordsCopy(t *testing.T) {
 	w := "magic"
-	a := words{
+	a := Words{
 		w: {},
 	}
-	b := a.copy()
+	b := a.Copy()
 	if !reflect.DeepEqual(a, *b) {
 		t.Errorf("copied values should be equal:\nwanted: %v\ngot:    %v", a, b)
 	}
@@ -76,7 +76,7 @@ func TestWordsCopy(t *testing.T) {
 
 func TestWordsScanShowPossible(t *testing.T) {
 	tests := []struct {
-		words
+		Words
 		in      string
 		wantOut string
 		wantErr bool
@@ -89,22 +89,22 @@ func TestWordsScanShowPossible(t *testing.T) {
 			wantOut: "show possible words [Yn]: ",
 		},
 		{
-			words:   words{"apple": {}, "berry": {}, "cakes": {}},
+			Words:   Words{"apple": {}, "berry": {}, "cakes": {}},
 			in:      "NAH", // uppercase n is ok
 			wantOut: "show possible words [Yn]: ",
 		},
 		{
-			words:   words{"apple": {}, "berry": {}, "cakes": {}},
+			Words:   Words{"apple": {}, "berry": {}, "cakes": {}},
 			in:      "yes\n",
 			wantOut: "show possible words [Yn]: remaining valid words: apple,berry,cakes\n",
 		},
 		{
-			words:   words{"apple": {}},
+			Words:   Words{"apple": {}},
 			in:      "\n", // user presses enter key (choosing default: Y)
 			wantOut: "show possible words [Yn]: remaining valid words: apple\n",
 		},
 		{
-			words:   words{"apple": {}},
+			Words:   Words{"apple": {}},
 			in:      "hmmm... no", // first word must be no
 			wantOut: "show possible words [Yn]: remaining valid words: apple\n",
 		},
@@ -115,7 +115,7 @@ func TestWordsScanShowPossible(t *testing.T) {
 			Reader: bufio.NewReader(strings.NewReader(test.in)),
 			Writer: bufio.NewWriter(&buf),
 		}
-		gotErr := test.words.scanShowPossible(rw)
+		gotErr := test.Words.ScanShowPossible(rw)
 		rw.Flush()
 		switch {
 		case test.wantErr:

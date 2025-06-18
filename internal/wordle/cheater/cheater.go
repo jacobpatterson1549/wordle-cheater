@@ -1,17 +1,23 @@
-package main
+package cheater
 
 import (
 	"fmt"
 	"io"
+
+	"github.com/jacobpatterson1549/wordle-cheater/internal/wordle/guess"
+	"github.com/jacobpatterson1549/wordle-cheater/internal/wordle/result"
+	"github.com/jacobpatterson1549/wordle-cheater/internal/wordle/score"
+	"github.com/jacobpatterson1549/wordle-cheater/internal/words"
 )
 
 // runWordleCheater runs an interactive wordle-cheater on the ReaderWriter using the text for the words
-func runWordleCheater(rw io.ReadWriter, wordsText string) error {
-	allWords, err := newWords(wordsText)
+func RunWordleCheater(rw io.ReadWriter, wordsText string) error {
+	const numLetters = 5
+	allWords, err := words.New(wordsText)
 	if err != nil {
 		return fmt.Errorf("loading words: %v", err)
 	}
-	availableWords := allWords.copy()
+	availableWords := allWords.Copy()
 
 	fmt.Fprintf(rw, "Running wordle-cheater\n")
 	fmt.Fprintf(rw, " * Guesses and scores are %v letters long\n", numLetters)
@@ -21,28 +27,28 @@ func runWordleCheater(rw io.ReadWriter, wordsText string) error {
 	fmt.Fprintf(rw, "   N - if a letter is not in the word\n")
 	fmt.Fprintf(rw, "The app runs until the correct word is found from a guess with only correct letters.\n\n")
 
-	var h history
+	var h result.History
 	for {
-		g, err := newGuess(rw, *allWords)
+		g, err := guess.New(rw, *allWords)
 		if err != nil {
 			return err
 		}
 
-		s, err := newScore(rw)
+		s, err := score.New(rw)
 		if err != nil {
 			return err
 		}
-		if *s == allCorrect {
+		if *s == score.AllCorrect {
 			return nil
 		}
 
-		r := result{
-			guess: *g,
-			score: *s,
+		r := result.Result{
+			Guess: *g,
+			Score: *s,
 		}
-		h.addResult(r, availableWords)
+		h.AddResult(r, availableWords)
 
-		if err := availableWords.scanShowPossible(rw); err != nil {
+		if err := availableWords.ScanShowPossible(rw); err != nil {
 			return err
 		}
 	}

@@ -1,23 +1,32 @@
-package main
+package result
 
-import "fmt"
+import (
+	"fmt"
+
+	"github.com/jacobpatterson1549/wordle-cheater/internal/wordle/char_set"
+	"github.com/jacobpatterson1549/wordle-cheater/internal/wordle/guess"
+	"github.com/jacobpatterson1549/wordle-cheater/internal/wordle/score"
+	"github.com/jacobpatterson1549/wordle-cheater/internal/words"
+)
 
 type (
-	// history stores the state of multiple results
-	history struct {
+	// History stores the state of multiple results
+	History struct {
 		correctLetters    [numLetters]rune
 		almostLetters     []rune
-		prohibitedLetters [numLetters]charSet
+		prohibitedLetters [numLetters]char_set.CharSet
 	}
-	// result is a guess and it's score
-	result struct {
-		guess guess
-		score score
+	// Result is a guess and it's score
+	Result struct {
+		Guess guess.Guess
+		Score score.Score
 	}
 )
 
+const numLetters = 5
+
 // addResult merges the result into the history and trims the words to only include ones that are allowed
-func (h *history) addResult(r result, m *words) {
+func (h *History) AddResult(r Result, m *words.Words) {
 	h.mergeResult(r)
 	for w := range *m {
 		if !h.allows(w) {
@@ -27,10 +36,10 @@ func (h *history) addResult(r result, m *words) {
 }
 
 // mergeResult merges the result into the history
-func (h *history) mergeResult(r result) {
+func (h *History) mergeResult(r Result) {
 	var usedLetters []rune
-	for i, si := range r.score {
-		gi := rune(r.guess[i])
+	for i, si := range r.Score {
+		gi := rune(r.Guess[i])
 		switch si {
 		case 'c':
 			h.setLetterCorrect(gi, i)
@@ -46,18 +55,18 @@ func (h *history) mergeResult(r result) {
 }
 
 // setLetterCorrect sets the letter at the index to correct
-func (h *history) setLetterCorrect(ch rune, index int) {
+func (h *History) setLetterCorrect(ch rune, index int) {
 	h.correctLetters[index] = ch
 }
 
 // setLetterAlmost marks the letter as available somewhere else by prohibiting it at the index
-func (h *history) setLetterAlmost(ch rune, index int) {
+func (h *History) setLetterAlmost(ch rune, index int) {
 	p := &h.prohibitedLetters[index]
 	p.Add(ch)
 }
 
 // setLetterProhibited marks the letter as prohibited from all indexes
-func (h *history) setLetterProhibited(ch rune, index int, usedLetters []rune) {
+func (h *History) setLetterProhibited(ch rune, index int, usedLetters []rune) {
 	for j := 0; j < numLetters; j++ {
 		pj := &h.prohibitedLetters[j]
 		pj.Add(ch)
@@ -66,7 +75,7 @@ func (h *history) setLetterProhibited(ch rune, index int, usedLetters []rune) {
 
 // mergeRequiredLetters adds required letters from a guess into the required letters.
 // New letters are only added if they were not previously required.
-func (h *history) mergeRequiredLetters(usedLetters []rune) {
+func (h *History) mergeRequiredLetters(usedLetters []rune) {
 	requiredLetters := make([]rune, len(h.almostLetters))
 	copy(requiredLetters, h.almostLetters)
 	existingCounts := letterCounts(h.almostLetters...)
@@ -90,7 +99,7 @@ func letterCounts(runes ...rune) map[rune]int {
 }
 
 // allows determines if a word is allowed based on the history (not prohibited)
-func (h *history) allows(w string) bool {
+func (h *History) allows(w string) bool {
 	letterCounts := make(map[rune]int, numLetters)
 	for i, ch := range w {
 		switch {
@@ -115,7 +124,7 @@ func (h *history) allows(w string) bool {
 }
 
 // String formats the required and prohibited letters to clearly show the state
-func (h history) String() string {
+func (h History) String() string {
 	correct := make([]rune, len(h.correctLetters))
 	for i, ch := range h.correctLetters {
 		switch {

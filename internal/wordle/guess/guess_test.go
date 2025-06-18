@@ -1,4 +1,4 @@
-package main
+package guess
 
 import (
 	"bufio"
@@ -6,13 +6,13 @@ import (
 	"testing"
 )
 
-func TestNewGuess(t *testing.T) {
+func TestNew(t *testing.T) {
 	simpleOut := "Enter guess (5 letters): "
 	tests := []struct {
 		in       string
 		wantOut  string
 		allWords map[string]struct{}
-		want     guess
+		want     Guess
 		wantErr  bool
 	}{
 		{
@@ -48,7 +48,7 @@ func TestNewGuess(t *testing.T) {
 			Reader: bufio.NewReader(strings.NewReader(test.in)),
 			Writer: bufio.NewWriter(&buf),
 		}
-		got, gotErr := newGuess(rw, test.allWords)
+		got, gotErr := New(rw, test.allWords)
 		rw.Flush()
 		switch {
 		case test.wantErr:

@@ -1,4 +1,4 @@
-package main
+package cheater
 
 import (
 	"bufio"
@@ -46,7 +46,7 @@ func TestRunWordleCheater(t *testing.T) {
 			Reader: bufio.NewReader(strings.NewReader(test.readTokens)),
 			Writer: bufio.NewWriter(&buf),
 		}
-		gotErr := runWordleCheater(rw, test.wordsText)
+		gotErr := RunWordleCheater(rw, test.wordsText)
 		switch {
 		case test.wantErr:
 			if gotErr == nil {

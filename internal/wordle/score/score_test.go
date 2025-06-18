@@ -1,4 +1,4 @@
-package main
+package score
 
 import (
 	"bufio"
@@ -6,11 +6,17 @@ import (
 	"testing"
 )
 
-func TestNewScore(t *testing.T) {
+func TestAllCorrectValid(t *testing.T) {
+	if err := AllCorrect.validate(); err != nil {
+		t.Errorf("all correct string is not valid: %v", err)
+	}
+}
+
+func TestNew(t *testing.T) {
 	tests := []struct {
 		in      string
 		wantOut string
-		want    score
+		want    Score
 		wantErr bool
 	}{
 		{
@@ -38,7 +44,7 @@ func TestNewScore(t *testing.T) {
 			Reader: bufio.NewReader(strings.NewReader(test.in)),
 			Writer: bufio.NewWriter(&buf),
 		}
-		got, gotErr := newScore(rw)
+		got, gotErr := New(rw)
 		rw.Flush()
 		switch {
 		case test.wantErr:
@@ -57,23 +63,23 @@ func TestNewScore(t *testing.T) {
 
 func TestScoreAllCorrect(t *testing.T) {
 	tests := []struct {
-		score
+		Score
 		want bool
 	}{
 		{
-			score: "cccca",
+			Score: "cccca",
 		},
 		{
-			score: "c",
+			Score: "c",
 		},
 		{
-			score: "ccccc",
+			Score: "ccccc",
 			want:  true,
 		},
 	}
 	for i, test := range tests {
-		if want, got := test.want, test.score == allCorrect; want != got {
-			t.Errorf("test %v: allCorrect values not equal for %q: wanted %v, got %v", i, test.score, want, got)
+		if want, got := test.want, test.Score == AllCorrect; want != got {
+			t.Errorf("test %v: allCorrect values not equal for %q: wanted %v, got %v", i, test.Score, want, got)
 		}
 	}
 }

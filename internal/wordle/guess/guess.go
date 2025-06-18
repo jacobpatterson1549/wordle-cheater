@@ -1,16 +1,20 @@
-package main
+package guess
 
 import (
 	"fmt"
 	"io"
 	"strings"
+
+	"github.com/jacobpatterson1549/wordle-cheater/internal/words"
 )
 
-// guess is a word that might be the answer
-type guess string
+const numLetters = 5
 
-// newGuess prompts for a guess on the ReadWriter until a valid one is given or an io error occurs
-func newGuess(rw io.ReadWriter, m words) (*guess, error) {
+// Guess is a word that might be the answer
+type Guess string
+
+// New prompts for a guess on the ReadWriter until a valid one is given or an io error occurs
+func New(rw io.ReadWriter, m words.Words) (*Guess, error) {
 	for {
 		fmt.Fprintf(rw, "Enter guess (%v letters): ", numLetters)
 		var word string
@@ -18,7 +22,7 @@ func newGuess(rw io.ReadWriter, m words) (*guess, error) {
 			return nil, fmt.Errorf("scanning guess: %v", err)
 		}
 		word = strings.ToLower(word)
-		g := guess(word)
+		g := Guess(word)
 		if err := g.validate(m); err != nil {
 			fmt.Fprintf(rw, "%v\n", err)
 			continue
@@ -28,7 +32,7 @@ func newGuess(rw io.ReadWriter, m words) (*guess, error) {
 }
 
 // validate ensures the guess is <<numLetters>> letters long and is in the words list (if a list is provided)
-func (g guess) validate(m words) error {
+func (g Guess) validate(m words.Words) error {
 	if len(g) != numLetters {
 		return fmt.Errorf("guess must be %v letters long", numLetters)
 	}

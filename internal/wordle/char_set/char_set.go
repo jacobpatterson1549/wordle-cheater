@@ -1,15 +1,15 @@
-package main
+package char_set
 
 import (
 	"fmt"
 	"strings"
 )
 
-// charSet is a bit field that stores the letters a-z
-type charSet uint32
+// CharSet is a bit field that stores the letters a-z
+type CharSet uint32
 
 // Add includes the character to the set.  Panics if the character is not in a-z
-func (cs *charSet) Add(ch rune) {
+func (cs *CharSet) Add(ch rune) {
 	if !cs.valid(ch) {
 		panic(fmt.Errorf("%c is not in a-z", ch))
 	}
@@ -17,7 +17,7 @@ func (cs *charSet) Add(ch rune) {
 }
 
 // Has determines if the character is in the set
-func (cs charSet) Has(ch rune) bool {
+func (cs CharSet) Has(ch rune) bool {
 	if !cs.valid(ch) {
 		return false
 	}
@@ -25,7 +25,7 @@ func (cs charSet) Has(ch rune) bool {
 }
 
 // AddWouldFill determines if the charset is filled with the letters a-z
-func (cs charSet) AddWouldFill(ch rune) bool {
+func (cs CharSet) AddWouldFill(ch rune) bool {
 	if !cs.valid(ch) {
 		return false
 	}
@@ -33,7 +33,7 @@ func (cs charSet) AddWouldFill(ch rune) bool {
 }
 
 // String creates a string of the characters in the set, in ascending order
-func (cs charSet) String() string {
+func (cs CharSet) String() string {
 	var b strings.Builder
 	b.WriteRune('[')
 	for ch := rune('a'); ch <= 'z'; ch++ {
@@ -46,11 +46,11 @@ func (cs charSet) String() string {
 }
 
 // valid determines if the byte can be used in the charSet, if it is a-z
-func (charSet) valid(ch rune) bool {
+func (CharSet) valid(ch rune) bool {
 	return 'a' <= ch && ch <= 'z'
 }
 
 // singleton creates a singleton charSet from the character
-func (charSet) singleton(ch rune) charSet {
+func (CharSet) singleton(ch rune) CharSet {
 	return 1 << (ch - 'a')
 }

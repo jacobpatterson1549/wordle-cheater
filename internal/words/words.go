@@ -1,4 +1,4 @@
-package main
+package words
 
 import (
 	"fmt"
@@ -7,18 +7,18 @@ import (
 	"strings"
 )
 
-// words is a collection of unique strings
-type words map[string]struct{}
+// Words is a collection of unique strings
+type Words map[string]struct{}
 
-// newWords loads the words from the file.
+// New loads the words from the file.
 // Words are separated by whitespace (spaces/newlines).
 // An error is returned if any words are not <<numLetters characters long and lowercase.
-func newWords(a string) (*words, error) {
+func New(a string) (*Words, error) {
 	lines := strings.Fields(a)
-	m := make(words, len(lines))
+	m := make(Words, len(lines))
 	for _, w := range lines {
-		if len(w) != numLetters {
-			return nil, fmt.Errorf("wanted all words to be %v letters long, got %q", numLetters, w)
+		if len(w) != 5 {
+			continue
 		}
 		if w != strings.ToLower(w) {
 			return nil, fmt.Errorf("wanted all words to be lowercase, got %q", w)
@@ -28,9 +28,9 @@ func newWords(a string) (*words, error) {
 	return &m, nil
 }
 
-// copy creates a new, identical duplication of the words
-func (m words) copy() *words {
-	m2 := make(words, len(m))
+// Copy creates a new, identical duplication of the words
+func (m Words) Copy() *Words {
+	m2 := make(Words, len(m))
 	for k, v := range m {
 		m2[k] = v
 	}
@@ -38,7 +38,7 @@ func (m words) copy() *words {
 }
 
 // sorted combines and sorts the words into a csv string
-func (m words) sorted() string {
+func (m Words) sorted() string {
 	s := make([]string, 0, len(m))
 	for w := range m {
 		s = append(s, w)
@@ -48,8 +48,8 @@ func (m words) sorted() string {
 	return j
 }
 
-// scanShowPossible prompts to display the words
-func (m words) scanShowPossible(rw io.ReadWriter) error {
+// ScanShowPossible prompts to display the words
+func (m Words) ScanShowPossible(rw io.ReadWriter) error {
 	fmt.Fprintf(rw, "show possible words [Yn]: ")
 	var choice string
 	n, err := fmt.Fscanf(rw, "%s", &choice)

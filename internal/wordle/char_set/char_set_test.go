@@ -1,10 +1,10 @@
-package main
+package char_set
 
 import "testing"
 
 func TestCharSetHas(t *testing.T) {
 	for ch := rune('a'); ch <= 'z'; ch++ {
-		var cs charSet
+		var cs CharSet
 		if cs.Has(ch) {
 			t.Errorf("%c in charSet before it is added", ch)
 		}
@@ -33,7 +33,10 @@ func TestCharSetAddWouldFill(t *testing.T) {
 		},
 	}
 	for i, test := range tests {
-		cs := newCharSetHelper(t, test.existingChars...)
+		var cs CharSet
+		for _, r := range test.existingChars {
+			cs.Add(r)
+		}
 		if want, got := test.want, cs.AddWouldFill(test.ch); want != got {
 			t.Errorf("test %v: addWouldFill not equal: wanted %v, got %v", i, want, got)
 		}
@@ -41,7 +44,11 @@ func TestCharSetAddWouldFill(t *testing.T) {
 }
 
 func TestCharSetString(t *testing.T) {
-	cs := newCharSetHelper(t, 'f', 'y', 'r', 'o', 't')
+	unorderedLetters := "fyrot"
+	var cs CharSet
+	for _, r := range unorderedLetters {
+		cs.Add(r)
+	}
 	if want, got := "[forty]", cs.String(); want != got {
 		t.Errorf("wanted %q, got %q", want, got)
 	}
@@ -51,7 +58,7 @@ func TestCharSetBadChars(t *testing.T) {
 	badChars := []rune{'?', 'A', 'Z', ' ', '!', '`', '\n', 0, 0x7F, 0xFF}
 	for i, ch := range badChars {
 		t.Run("bad-add-#"+string(rune('0'+i)), func(t *testing.T) {
-			var cs charSet
+			var cs CharSet
 			if cs.Has(ch) {
 				t.Errorf("bad character 0x%x in charSet", ch)
 			}
@@ -64,13 +71,4 @@ func TestCharSetBadChars(t *testing.T) {
 			cs.Add(ch)
 		})
 	}
-}
-
-func newCharSetHelper(t *testing.T, chars ...rune) charSet {
-	t.Helper()
-	var cs charSet
-	for _, ch := range chars {
-		cs.Add(ch)
-	}
-	return cs
 }
