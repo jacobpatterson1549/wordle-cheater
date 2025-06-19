@@ -1,0 +1,27 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<meta http-equiv="Content-Type" content="text/html;charset=utf-8">
+	<meta name="Description" content="a collection of word game cheating tools">
+	<title>{{.Title}}</title>
+	<link rel="shortcut icon" href="data:image/x-icon;base64," type="image/x-icon">
+	<style>
+		{{template "main.css" .}}
+	</style>
+</head>
+
+<body>
+	<h1><a href="?">{{.Title}}</a></h1>
+    <header></header>
+	<nav></nav>
+	<main>
+		{{- if eq .Name "wordle"}}
+		{{template "wordle.html" .Cheater}}
+		{{- end}}
+	</main>
+    <footer></footer>
+</body>
+
+</html>
