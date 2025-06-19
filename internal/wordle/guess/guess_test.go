@@ -6,7 +6,7 @@ import (
 	"testing"
 )
 
-func TestNew(t *testing.T) {
+func TestScan(t *testing.T) {
 	simpleOut := "Enter guess (5 letters): "
 	tests := []struct {
 		in       string
@@ -48,7 +48,7 @@ func TestNew(t *testing.T) {
 			Reader: bufio.NewReader(strings.NewReader(test.in)),
 			Writer: bufio.NewWriter(&buf),
 		}
-		got, gotErr := New(rw, test.allWords)
+		got, gotErr := Scan(rw, test.allWords)
 		rw.Flush()
 		switch {
 		case test.wantErr:

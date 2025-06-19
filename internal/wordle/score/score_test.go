@@ -7,12 +7,12 @@ import (
 )
 
 func TestAllCorrectValid(t *testing.T) {
-	if err := AllCorrect.validate(); err != nil {
+	if err := AllCorrect.Validate(); err != nil {
 		t.Errorf("all correct string is not valid: %v", err)
 	}
 }
 
-func TestNew(t *testing.T) {
+func TestScan(t *testing.T) {
 	tests := []struct {
 		in      string
 		wantOut string
@@ -44,7 +44,7 @@ func TestNew(t *testing.T) {
 			Reader: bufio.NewReader(strings.NewReader(test.in)),
 			Writer: bufio.NewWriter(&buf),
 		}
-		got, gotErr := New(rw)
+		got, gotErr := Scan(rw)
 		rw.Flush()
 		switch {
 		case test.wantErr:

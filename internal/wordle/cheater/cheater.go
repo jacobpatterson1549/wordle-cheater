@@ -33,12 +33,12 @@ func runWordleCheater(rw io.ReadWriter, wordsText string) error {
 
 	var h result.History
 	for {
-		g, err := guess.New(rw, *allWords)
+		g, err := guess.Scan(rw, *allWords)
 		if err != nil {
 			return err
 		}
 
-		s, err := score.New(rw)
+		s, err := score.Scan(rw)
 		if err != nil {
 			return err
 		}

@@ -14,17 +14,23 @@ type Score string
 
 const AllCorrect Score = "ccccc"
 
-// New prompts for a score on the ReadWriter until a valid one is given or an io error occurs
-func New(rw io.ReadWriter) (*Score, error) {
+// New reads the next word from the reader.  It may be invalid.
+func New(word string) Score {
+	word = strings.ToLower(word)
+	s := Score(word)
+	return s
+}
+
+// Scan prompts for a score on the ReadWriter until a valid one is given or an io error occurs
+func Scan(rw io.ReadWriter) (*Score, error) {
 	for {
 		fmt.Fprintf(rw, "Enter score: ")
 		var word string
 		if _, err := fmt.Fscan(rw, &word); err != nil {
 			return nil, fmt.Errorf("scanning guess: %v", err)
 		}
-		word = strings.ToLower(word)
-		s := Score(word)
-		if err := s.validate(); err != nil {
+		s := New(word)
+		if err := s.Validate(); err != nil {
 			fmt.Fprintf(rw, "%v\n", err)
 			continue
 		}
@@ -32,8 +38,8 @@ func New(rw io.ReadWriter) (*Score, error) {
 	}
 }
 
-// validate ensures the score is <<numLetters>> letters long and consists only of the {c,a,n} letters
-func (s Score) validate() error {
+// Validate ensures the score is <<numLetters>> letters long and consists only of the {c,a,n} letters
+func (s Score) Validate() error {
 	const numLetters = 5
 	if len(s) != numLetters {
 		return fmt.Errorf("score must be %v letters long", numLetters)
