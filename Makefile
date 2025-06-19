@@ -24,7 +24,9 @@ $(BUILD_DIR):
 	mkdir -p $@
 
 $(BUILD_DIR)/$(OBJ): $(BUILD_DIR)/$(COVERAGE_OBJ) | $(BUILD_DIR)
-	$(GO_ARGS) go build -o $@
+	go list ./... | grep -E cmd/$(@F)$$ \
+		| $(GO_ARGS) xargs go build \
+			-o $@
 
 $(BUILD_DIR)/$(COVERAGE_OBJ): $(SRC) $(BUILD_DIR)/$(WORDS_OBJ) | $(BUILD_DIR)
 	go test ./... -coverprofile=$@

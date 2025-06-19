@@ -1,11 +1,15 @@
 package words
 
 import (
+	_ "embed"
 	"fmt"
 	"io"
 	"sort"
 	"strings"
 )
+
+//go:embed build/words.txt
+var WordsTextFile string
 
 // Words is a collection of unique strings
 type Words map[string]struct{}

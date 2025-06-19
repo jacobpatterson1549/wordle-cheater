@@ -4,10 +4,10 @@ import (
 	"reflect"
 	"testing"
 
+	words "github.com/jacobpatterson1549/wordle-cheater"
 	"github.com/jacobpatterson1549/wordle-cheater/internal/wordle/char_set"
 	"github.com/jacobpatterson1549/wordle-cheater/internal/wordle/guess"
 	"github.com/jacobpatterson1549/wordle-cheater/internal/wordle/score"
-	"github.com/jacobpatterson1549/wordle-cheater/internal/words"
 )
 
 func TestHistoryAddResult(t *testing.T) {

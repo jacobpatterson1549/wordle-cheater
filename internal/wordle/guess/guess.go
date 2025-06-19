@@ -5,7 +5,7 @@ import (
 	"io"
 	"strings"
 
-	"github.com/jacobpatterson1549/wordle-cheater/internal/words"
+	words "github.com/jacobpatterson1549/wordle-cheater"
 )
 
 const numLetters = 5

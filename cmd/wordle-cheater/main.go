@@ -2,16 +2,12 @@
 package main
 
 import (
-	_ "embed"
 	"fmt"
 	"io"
 	"os"
 
 	"github.com/jacobpatterson1549/wordle-cheater/internal/wordle/cheater"
 )
-
-//go:embed build/words.txt
-var wordsTextFile string
 
 // main runs wordle-cheater on the command-line using stdin and stdout
 func main() {
@@ -22,7 +18,7 @@ func main() {
 		Reader: os.Stdin,
 		Writer: os.Stdout,
 	}
-	if err := cheater.RunWordleCheater(rw, wordsTextFile); err != nil {
+	if err := cheater.RunWordleCheater(rw); err != nil {
 		panic(fmt.Errorf("running wordle: %v", err))
 	}
 }

@@ -46,7 +46,7 @@ func TestRunWordleCheater(t *testing.T) {
 			Reader: bufio.NewReader(strings.NewReader(test.readTokens)),
 			Writer: bufio.NewWriter(&buf),
 		}
-		gotErr := RunWordleCheater(rw, test.wordsText)
+		gotErr := runWordleCheater(rw, test.wordsText)
 		switch {
 		case test.wantErr:
 			if gotErr == nil {
