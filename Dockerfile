@@ -1,0 +1,21 @@
+# download go dependencies for source code
+FROM golang:1.24-alpine3.22 AS builder
+WORKDIR /app
+COPY go.mod go.sum ./
+RUN apk add --no-cache \
+        make=~4.4.1-r3 \
+        aspell=~0.60.8.1-r0 \
+        aspell-en=2020.12.07-r0 \
+    && go mod download
+
+# build the server
+COPY . ./
+RUN make build/server \
+    GO_ARGS="CGO_ENABLED=0" \
+    && go clean -cache
+
+# copy the server to a minimal build image
+FROM scratch
+WORKDIR /app
+COPY --from=builder /app/build/server .
+ENTRYPOINT [ "/app/server" ]

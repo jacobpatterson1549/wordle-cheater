@@ -48,3 +48,4 @@ $(BUILD_DIR)/$(WORDS_OBJ): | $(BUILD_DIR)
 		| uniq \
 		| grep -E ^[a-z]{5}$$ \
 		> $@
+
