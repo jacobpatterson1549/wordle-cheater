@@ -10,12 +10,12 @@ RUN apk add --no-cache \
 
 # build the server
 COPY . ./
-RUN make build/server \
+RUN make build/bin/server \
     GO_ARGS="CGO_ENABLED=0" \
     && go clean -cache
 
 # copy the server to a minimal build image
 FROM scratch
 WORKDIR /app
-COPY --from=builder /app/build/server .
+COPY --from=builder /app/build/bin/server .
 ENTRYPOINT [ "/app/server" ]
