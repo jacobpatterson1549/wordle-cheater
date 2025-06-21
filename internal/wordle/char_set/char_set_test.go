@@ -72,3 +72,25 @@ func TestCharSetBadChars(t *testing.T) {
 		})
 	}
 }
+
+func TestCharSetLength(t *testing.T) {
+	tests := []struct {
+		text string
+		want int
+	}{
+		{},
+		{"all", 2},
+		{"wordlecheater", 10},
+	}
+	for _, test := range tests {
+		t.Run(test.text, func(t *testing.T) {
+			var cs CharSet
+			for _, r := range test.text {
+				cs.Add(r)
+			}
+			if want, got := test.want, cs.Length(); want != got {
+				t.Errorf("wanted %v, got %v", want, got)
+			}
+		})
+	}
+}

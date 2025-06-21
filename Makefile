@@ -1,4 +1,4 @@
-.PHONY: all test coverage clean run serve
+.PHONY: all test coverage clean
 
 BUILD_DIR := build
 BIN_DIR := $(BUILD_DIR)/bin
@@ -37,6 +37,6 @@ $(BUILD_DIR)/$(WORDS_OBJ): | $(BUILD_DIR)
 	aspell -d en_US dump master \
 		| sort \
 		| uniq \
-		| grep -E ^[a-z]{5}$$ \
+		| grep -E ^[a-z]+$$ \
 		> $@
 

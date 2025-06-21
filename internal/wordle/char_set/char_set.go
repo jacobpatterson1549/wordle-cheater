@@ -54,3 +54,13 @@ func (CharSet) valid(ch rune) bool {
 func (CharSet) singleton(ch rune) CharSet {
 	return 1 << (ch - 'a')
 }
+
+func (cs CharSet) Length() int {
+	n := 0
+	for ch := rune('a'); ch <= 'z'; ch++ {
+		if cs.Has(ch) {
+			n++
+		}
+	}
+	return n
+}
