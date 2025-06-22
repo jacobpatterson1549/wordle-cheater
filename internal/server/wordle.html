@@ -12,7 +12,7 @@
     {{- else}}
     {{- with .Possible}}
     <label for="Possible">Possible words:</label>
-    <textarea id="Possible" cols="10">{{range .}}{{.}} {{end}}</textarea>
+    <textarea id="Possible" rows="10">{{range .}}{{.}} {{end}}</textarea>
     {{- end}}
     <label for="ShowPossible">Show Possible words</label>
     <input id="ShowPossible" name="ShowPossible" type="checkbox" {{- if .ShowPossible}}checked{{end}}>

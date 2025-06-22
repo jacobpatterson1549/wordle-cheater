@@ -24,6 +24,6 @@ form {
     grid-template-columns: 1fr 1fr;
 }
 
-input {
-    max-width: 15em;
+input, textarea {
+    max-width: 50vw;
 }
