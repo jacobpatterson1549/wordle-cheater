@@ -12,13 +12,14 @@ var (
 	handler http.Handler
 	tmpl    *template.Template
 
-	//go:embed main.html main.css wordle.html
+	//go:embed main.html main.css wordle.html spelling_bee.html
 	_siteFS embed.FS
 )
 
 func init() {
 	mux := http.NewServeMux()
 	mux.HandleFunc("GET /{$}", wordleCheater)
+	mux.HandleFunc("GET /spelling-bee", spellingBeeCheater)
 	handler = mux
 
 	inc := func(i int) int {
@@ -50,7 +51,17 @@ func wordleCheater(w http.ResponseWriter, r *http.Request) {
 		Title:   "Wordle Cheater",
 		Cheater: *c,
 	}
-	handleTemplate(w, tmpl, "wordle.html", p)
+	handleTemplate(w, tmpl, p)
+}
+
+func spellingBeeCheater(w http.ResponseWriter, r *http.Request) {
+	c := RunSpellingBeeCheater(r.URL.Query())
+	p := Page{
+		Name:    "spelling_bee",
+		Title:   "Spelling Bee Cheater",
+		Cheater: c,
+	}
+	handleTemplate(w, tmpl, p)
 }
 
 func handleError(w http.ResponseWriter, message string, err error) {
@@ -58,7 +69,7 @@ func handleError(w http.ResponseWriter, message string, err error) {
 	http.Error(w, message, http.StatusBadRequest)
 }
 
-func handleTemplate(w http.ResponseWriter, tmpl *template.Template, name string, data any) {
+func handleTemplate(w http.ResponseWriter, tmpl *template.Template, data any) {
 	buf := new(bytes.Buffer)
 	if err := tmpl.Execute(buf, data); err != nil {
 		handleError(w, "rendering template", err)

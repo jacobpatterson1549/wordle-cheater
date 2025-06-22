@@ -19,6 +19,8 @@
 	<main>
 		{{- if eq .Name "wordle"}}
 		{{template "wordle.html" .Cheater}}
+		{{- else if eq .Name "spelling_bee"}}
+		{{template "spelling_bee.html" .Cheater}}
 		{{- end}}
 	</main>
     <footer></footer>
