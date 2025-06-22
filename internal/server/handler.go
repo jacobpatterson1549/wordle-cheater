@@ -34,7 +34,9 @@ func init() {
 }
 
 func ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	handler.ServeHTTP(w, r)
+	h := handler
+	h = withContentEncoding(h)
+	h.ServeHTTP(w, r)
 }
 
 func wordleCheater(w http.ResponseWriter, r *http.Request) {
