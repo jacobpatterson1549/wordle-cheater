@@ -92,6 +92,20 @@ func TestHistoryMergeResult(t *testing.T) {
 				},
 			},
 		},
+		{
+			Guess: "dazed",
+			Score: "aanan",
+			want: History{
+				almostLetters: []rune{'d', 'a', 'e'},
+				prohibitedLetters: [numLetters]char_set.CharSet{
+					newCharSetHelper(t, 'z', 'd'),
+					newCharSetHelper(t, 'z','a'),
+					newCharSetHelper(t, 'z'),
+					newCharSetHelper(t, 'z','e'),
+					newCharSetHelper(t, 'z', 'd'),
+				},
+			},
+		},
 	}
 	for i, test := range tests {
 		r := Result{

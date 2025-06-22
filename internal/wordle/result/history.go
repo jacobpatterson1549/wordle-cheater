@@ -38,6 +38,7 @@ func (h *History) AddResult(r Result, m *words.Words) {
 // mergeResult merges the result into the history
 func (h *History) mergeResult(r Result) {
 	var usedLetters []rune
+	prohibitedCounts := make(map[rune]int, 26)
 	for i, si := range r.Score {
 		gi := rune(r.Guess[i])
 		switch si {
@@ -47,8 +48,17 @@ func (h *History) mergeResult(r Result) {
 		case 'a':
 			h.setLetterAlmost(gi, i)
 			usedLetters = append(usedLetters, gi)
+			prohibitedCounts[gi]--
 		case 'n':
-			h.setLetterProhibited(gi, i, usedLetters)
+			h.setLetterProhibited(gi, i)
+			prohibitedCounts[gi]++
+		}
+	}
+	for ch, prohibitedCount := range prohibitedCounts {
+		if prohibitedCount > 0 {
+			for i := range h.prohibitedLetters {
+				h.setLetterProhibited(ch, i)
+			}
 		}
 	}
 	h.mergeRequiredLetters(usedLetters)
@@ -65,12 +75,9 @@ func (h *History) setLetterAlmost(ch rune, index int) {
 	p.Add(ch)
 }
 
-// setLetterProhibited marks the letter as prohibited from all indexes
-func (h *History) setLetterProhibited(ch rune, index int, usedLetters []rune) {
-	for j := 0; j < numLetters; j++ {
-		pj := &h.prohibitedLetters[j]
-		pj.Add(ch)
-	}
+// setLetterProhibited marks the letter as prohibited at the index
+func (h *History) setLetterProhibited(ch rune, index int) {
+	h.prohibitedLetters[index].Add(ch)
 }
 
 // mergeRequiredLetters adds required letters from a guess into the required letters.
