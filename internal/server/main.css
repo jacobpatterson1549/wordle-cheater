@@ -6,11 +6,16 @@ body {
   font-family: system-ui;
   font-size: 1.125rem;
   line-height: 1.6;
-}
-
-main, h1 {
   width: min(65ch, 100% - 4rem);
   margin-inline: auto;
+}
+
+body > * {
+  margin-bottom: 1em;
+}
+
+nav a:not([href]) {
+  font-weight: bold;
 }
 
 form {

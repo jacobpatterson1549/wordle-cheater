@@ -13,9 +13,13 @@
 </head>
 
 <body>
+    <header>
 	<h1><a href="?">{{.Title}}</a></h1>
-    <header></header>
-	<nav></nav>
+	<nav>
+		<a {{if not (eq .Name "wordle")}}href="/"{{end}}>Wordle-Cheater</a>
+		<a {{if not (eq .Name "spelling_bee")}}href="/spelling-bee"{{end}}>Spelling-Bee-Cheater</a>
+	</nav>
+	</header>
 	<main>
 		{{- if eq .Name "wordle"}}
 		{{template "wordle.html" .Cheater}}
@@ -23,7 +27,10 @@
 		{{template "spelling_bee.html" .Cheater}}
 		{{- end}}
 	</main>
-    <footer></footer>
+    <footer>
+		<a href="https://jacobpatterson1549.dev/">Homepage</a>
+		<a href="https://github.com/jacobpatterson1549/wordle-cheater">Github</a>
+	</footer>
 </body>
 
 </html>
