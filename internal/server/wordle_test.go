@@ -45,7 +45,7 @@ func TestRunWordleCheater(t *testing.T) {
 					{Guess: "forts", Score: "ccccn"},
 					{},
 				},
-				Possible: []string{"forte", "forth", "forty"},
+				Possible:     []string{"forte", "forth", "forty"},
 				ShowPossible: true,
 			},
 		},

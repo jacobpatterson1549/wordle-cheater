@@ -99,9 +99,9 @@ func TestHistoryMergeResult(t *testing.T) {
 				almostLetters: []rune{'d', 'a', 'e'},
 				prohibitedLetters: [numLetters]char_set.CharSet{
 					newCharSetHelper(t, 'z', 'd'),
-					newCharSetHelper(t, 'z','a'),
+					newCharSetHelper(t, 'z', 'a'),
 					newCharSetHelper(t, 'z'),
-					newCharSetHelper(t, 'z','e'),
+					newCharSetHelper(t, 'z', 'e'),
 					newCharSetHelper(t, 'z', 'd'),
 				},
 			},
