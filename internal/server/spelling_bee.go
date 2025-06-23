@@ -12,6 +12,11 @@ type (
 		spelling_bee.SpellingBee
 		Output []string
 	}
+	Summary struct {
+		TotalScore   int
+		PangramCount int
+		Words        []Word
+	}
 	Word struct {
 		Score     int
 		Value     string
@@ -50,18 +55,19 @@ func RunSpellingBeeCheater(query map[string][]string) SpellingBeeCheater {
 	return sbc
 }
 
-func (sbc SpellingBeeCheater) Words() []Word {
+func (sbc SpellingBeeCheater) Summary() Summary {
+	var s Summary
 	words := sbc.SpellingBee.Words(words.WordsTextFile)
-	display := make([]Word, len(words))
+	s.Words = make([]Word, len(words))
 	for i, w := range words {
-		display[i] = Word{
-			Score: w.Score,
-			Value: w.Value,
-		}
+		s.Words[i].Value = w.Value
+		s.Words[i].Score = w.Score
+		s.TotalScore += w.Score
 		if w.IsPangram {
-			display[i].IsPangram = "PANGRAM!"
+			s.Words[i].IsPangram = "PANGRAM!"
+			s.PangramCount++
 		}
 	}
-	slices.Reverse(display)
-	return display
+	slices.Reverse(s.Words)
+	return s
 }
