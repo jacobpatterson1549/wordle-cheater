@@ -8,25 +8,29 @@
     <input type="submit">
 </form>
 {{- range .Output}}<p class="output">{{.}}<p>{{end}}
-{{- with .Words}}
+{{- if ne (len .OtherLetters) 0}}
+{{- with .Summary}}
+<div style="max-height: 55vh; overflow-y: auto">
 <table>
     <caption>Word Details</caption>
     <thead>
-        <th>Score</th>
         <th>Word</th>
+        <th>Score</th>
         <th>Details</th>
     </thead>
-    {{- range .}}
+    {{- range .Words}}
     <tr>
-        <td>{{.Score}}</td>
         <td>{{.Value}}</td>
+        <td>{{.Score}}</td>
         <td>{{.IsPangram}}</td>
     </tr>
     {{- end}}
     <tfoot>
-        <th><!-- TODO: sum score --></th>
-        <th></th>
-        <th><!-- TODO: get pangram count --></th>
+        <th>{{len .Words}} Words</th>
+        <th>{{.TotalScore}} Total Score</th>
+        <th>{{with .PangramCount}}{{.}} Pangrams{{end}}</th>
     </tfoot>
 </table>
+</div>
+{{- end}}
 {{- end}}
