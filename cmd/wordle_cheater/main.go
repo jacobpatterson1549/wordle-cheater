@@ -6,6 +6,7 @@ import (
 	"io"
 	"os"
 
+	words "github.com/jacobpatterson1549/wordle-cheater"
 	"github.com/jacobpatterson1549/wordle-cheater/internal/wordle/cheater"
 )
 
@@ -18,7 +19,7 @@ func main() {
 		Reader: os.Stdin,
 		Writer: os.Stdout,
 	}
-	if err := cheater.RunWordleCheater(rw); err != nil {
+	if err := cheater.RunWordleCheater(rw, words.WordsTextFile); err != nil {
 		panic(fmt.Errorf("running wordle: %v", err))
 	}
 }

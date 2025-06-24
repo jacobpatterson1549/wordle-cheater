@@ -17,19 +17,14 @@ type WordleCheater struct {
 	Done         bool
 }
 
-func RunWordleCheater(query map[string][]string) (*WordleCheater, error) {
-	return runWordleCheater(query, words.WordsTextFile)
-}
-
-func runWordleCheater(query map[string][]string, wordsTextFile string) (*WordleCheater, error) {
-
+func RunWordleCheater(query map[string][]string, wordsText string) (*WordleCheater, error) {
 	for k, v := range query {
 		if len(v) != 1 {
 			return nil, fmt.Errorf("wanted only one value for %q", k)
 		}
 	}
 
-	m, err := words.New(wordsTextFile)
+	m, err := words.New(wordsText)
 	if err != nil {
 		return nil, fmt.Errorf("creating word list: %w", err)
 	}

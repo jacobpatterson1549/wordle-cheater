@@ -5,13 +5,13 @@ import (
 	"fmt"
 	"slices"
 
-	words "github.com/jacobpatterson1549/wordle-cheater"
 	"github.com/jacobpatterson1549/wordle-cheater/internal/spelling_bee"
 )
 
 type (
 	SpellingBeeCheater struct {
 		spelling_bee.SpellingBee
+		wordsText string
 	}
 	Summary struct {
 		TotalScore   int
@@ -30,7 +30,7 @@ const (
 	otherLettersParam  = "other-letters"
 )
 
-func RunSpellingBeeCheater(query map[string][]string) (*SpellingBeeCheater, error) {
+func RunSpellingBeeCheater(query map[string][]string, wordsText string) (*SpellingBeeCheater, error) {
 	centralLetters, err1 := parseParam(centralLetterParam, 1, query)
 	otherLetters, err2 := parseParam(otherLettersParam, 6, query)
 	if err := cmp.Or(err1, err2); err != nil {
@@ -46,7 +46,11 @@ func RunSpellingBeeCheater(query map[string][]string) (*SpellingBeeCheater, erro
 	for _, r := range centralLetters {
 		sb.CentralLetter = r
 	}
-	return &SpellingBeeCheater{sb}, nil
+	sbc := SpellingBeeCheater{
+		SpellingBee: sb,
+		wordsText:   wordsText,
+	}
+	return &sbc, nil
 }
 
 func parseParam(paramName string, wantLength int, query map[string][]string) (string, error) {
@@ -64,7 +68,7 @@ func parseParam(paramName string, wantLength int, query map[string][]string) (st
 
 func (sbc SpellingBeeCheater) Summary() Summary {
 	var s Summary
-	words := sbc.SpellingBee.Words(words.WordsTextFile)
+	words := sbc.SpellingBee.Words(sbc.wordsText)
 	s.Words = make([]Word, len(words))
 	for i, w := range words {
 		s.Words[i].Value = w.Value

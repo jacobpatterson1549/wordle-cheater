@@ -16,10 +16,10 @@ var (
 	_siteFS embed.FS
 )
 
-func init() {
+func NewHandler(wordsText string) http.Handler {
 	mux := http.NewServeMux()
-	mux.HandleFunc("GET /{$}", wordleCheater)
-	mux.HandleFunc("GET /spelling-bee", spellingBeeCheater)
+	mux.HandleFunc("GET /{$}", wordleCheater(wordsText))
+	mux.HandleFunc("GET /spelling-bee", spellingBeeCheater(wordsText))
 	handler = mux
 
 	inc := func(i int) int {
@@ -32,6 +32,7 @@ func init() {
 		Funcs(funcs).
 		ParseFS(_siteFS, "*.html", "*.css"))
 	tmpl.Funcs(funcs)
+	return handler
 }
 
 func ServeHTTP(w http.ResponseWriter, r *http.Request) {
@@ -40,34 +41,38 @@ func ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	h.ServeHTTP(w, r)
 }
 
-func wordleCheater(w http.ResponseWriter, r *http.Request) {
-	q := r.URL.Query()
-	c, err := RunWordleCheater(q)
-	if err != nil {
-		handleBadRequest(w, "creating wordle cheater", err)
-		return
+func wordleCheater(wordsText string) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		q := r.URL.Query()
+		c, err := RunWordleCheater(q, wordsText)
+		if err != nil {
+			handleBadRequest(w, "creating wordle cheater", err)
+			return
+		}
+		p := Page{
+			Name:    "wordle",
+			Title:   "Wordle Cheater",
+			Cheater: *c,
+		}
+		handleTemplate(w, tmpl, p)
 	}
-	p := Page{
-		Name:    "wordle",
-		Title:   "Wordle Cheater",
-		Cheater: *c,
-	}
-	handleTemplate(w, tmpl, p)
 }
 
-func spellingBeeCheater(w http.ResponseWriter, r *http.Request) {
-	q := r.URL.Query()
-	c, err := RunSpellingBeeCheater(q)
-	if err != nil {
-		handleBadRequest(w, "creating wordle cheater", err)
-		return
+func spellingBeeCheater(wordsText string) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		q := r.URL.Query()
+		c, err := RunSpellingBeeCheater(q, wordsText)
+		if err != nil {
+			handleBadRequest(w, "creating wordle cheater", err)
+			return
+		}
+		p := Page{
+			Name:    "spelling_bee",
+			Title:   "Spelling Bee Cheater",
+			Cheater: c,
+		}
+		handleTemplate(w, tmpl, p)
 	}
-	p := Page{
-		Name:    "spelling_bee",
-		Title:   "Spelling Bee Cheater",
-		Cheater: c,
-	}
-	handleTemplate(w, tmpl, p)
 }
 
 func handleBadRequest(w http.ResponseWriter, message string, err error) {
