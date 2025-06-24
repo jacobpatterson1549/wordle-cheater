@@ -4,9 +4,13 @@ import (
 	"bufio"
 	"strings"
 	"testing"
+
+	words "github.com/jacobpatterson1549/wordle-cheater"
 )
 
 func TestRunWordleCheater(t *testing.T) {
+	o := words.WordsTextFile
+	defer func() { words.WordsTextFile = o }()
 	tests := []struct {
 		readTokens string
 		wordsText  string
@@ -15,6 +19,11 @@ func TestRunWordleCheater(t *testing.T) {
 		{
 			readTokens: "smart ccccc",
 			wordsText:  "smart",
+		},
+		{
+			readTokens: "smart ccccc",
+			wordsText:  "Smart",
+			wantErr:    true,
 		},
 		{
 			readTokens: "dummy nnnnn n smart ccccc",
@@ -46,7 +55,8 @@ func TestRunWordleCheater(t *testing.T) {
 			Reader: bufio.NewReader(strings.NewReader(test.readTokens)),
 			Writer: bufio.NewWriter(&buf),
 		}
-		gotErr := runWordleCheater(rw, test.wordsText)
+		words.WordsTextFile = test.wordsText
+		gotErr := RunWordleCheater(rw)
 		switch {
 		case test.wantErr:
 			if gotErr == nil {
