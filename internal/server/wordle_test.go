@@ -9,35 +9,36 @@ import (
 	"github.com/jacobpatterson1549/wordle-cheater/internal/wordle/result"
 )
 
-func TestRunWordleCheater(t *testing.T) {
-	t.Run("public", func(t *testing.T) {
-		o := words.WordsTextFile
-		defer func() { words.WordsTextFile = o }()
-		tests := []struct {
-			words  string
-			wantOk bool
-		}{
-			{wantOk: true},
-			{words: "words", wantOk: true},
-			{words: "Words"},
-		}
-		for _, test := range tests {
-			t.Run(test.words, func(t *testing.T) {
-				words.WordsTextFile = test.words
-				got, err := RunWordleCheater(nil)
-				switch {
-				case err != nil:
-					if test.wantOk {
-						t.Error(err)
-					}
-				case !test.wantOk:
-					t.Errorf("wanted error")
-				case got == nil:
-					t.Errorf("wanted cheater: %v", got)
+func TestRunWordleCheaterPublic(t *testing.T) {
+	o := words.WordsTextFile
+	defer func() { words.WordsTextFile = o }()
+	tests := []struct {
+		words  string
+		wantOk bool
+	}{
+		{wantOk: true},
+		{words: "words", wantOk: true},
+		{words: "Words"},
+	}
+	for _, test := range tests {
+		t.Run(test.words, func(t *testing.T) {
+			words.WordsTextFile = test.words
+			got, err := RunWordleCheater(nil)
+			switch {
+			case err != nil:
+				if test.wantOk {
+					t.Error(err)
 				}
-			})
-		}
-	})
+			case !test.wantOk:
+				t.Errorf("wanted error")
+			case got == nil:
+				t.Errorf("wanted cheater: %v", got)
+			}
+		})
+	}
+}
+
+func TestRunWordleCheater(t *testing.T) {
 	tests := []struct {
 		name   string
 		query  map[string][]string
@@ -186,6 +187,9 @@ func TestRunWordleCheater(t *testing.T) {
 			}
 		})
 	}
+}
+
+func TestRunWordleCheaterGuesssCount(t *testing.T) {
 	t.Run("guessCount", func(t *testing.T) {
 		tests := []struct {
 			n        int
