@@ -5,10 +5,39 @@ import (
 	"strconv"
 	"testing"
 
+	words "github.com/jacobpatterson1549/wordle-cheater"
 	"github.com/jacobpatterson1549/wordle-cheater/internal/wordle/result"
 )
 
 func TestRunWordleCheater(t *testing.T) {
+	t.Run("public", func(t *testing.T) {
+		o := words.WordsTextFile
+		defer func() { words.WordsTextFile = o }()
+		tests := []struct {
+			words  string
+			wantOk bool
+		}{
+			{wantOk: true},
+			{words: "words", wantOk: true},
+			{words: "Words"},
+		}
+		for _, test := range tests {
+			t.Run(test.words, func(t *testing.T) {
+				words.WordsTextFile = test.words
+				got, err := RunWordleCheater(nil)
+				switch {
+				case err != nil:
+					if test.wantOk {
+						t.Error(err)
+					}
+				case !test.wantOk:
+					t.Errorf("wanted error")
+				case got == nil:
+					t.Errorf("wanted cheater: %v", got)
+				}
+			})
+		}
+	})
 	tests := []struct {
 		name   string
 		query  map[string][]string
@@ -28,6 +57,22 @@ func TestRunWordleCheater(t *testing.T) {
 			name: "unexpected param",
 			query: map[string][]string{
 				"unknown": nil,
+			},
+		},
+		{
+			name: "invalid guess",
+			query: map[string][]string{
+				"g0":           {"word"},
+				"s0":           {"ccccn"},
+				"ShowPossible": {""},
+			},
+		},
+		{
+			name: "invalid score",
+			query: map[string][]string{
+				"g0":           {"words"},
+				"s0":           {"right"},
+				"ShowPossible": {""},
 			},
 		},
 		{
