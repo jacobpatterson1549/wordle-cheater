@@ -41,9 +41,10 @@ func ServeHTTP(w http.ResponseWriter, r *http.Request) {
 }
 
 func wordleCheater(w http.ResponseWriter, r *http.Request) {
-	c, err := RunWordleCheater(r.URL.Query())
+	q := r.URL.Query()
+	c, err := RunWordleCheater(q)
 	if err != nil {
-		handleError(w, "creating wordle cheater", err)
+		handleBadRequest(w, "creating wordle cheater", err)
 		return
 	}
 	p := Page{
@@ -55,7 +56,12 @@ func wordleCheater(w http.ResponseWriter, r *http.Request) {
 }
 
 func spellingBeeCheater(w http.ResponseWriter, r *http.Request) {
-	c := RunSpellingBeeCheater(r.URL.Query())
+	q := r.URL.Query()
+	c, err := RunSpellingBeeCheater(q)
+	if err != nil {
+		handleBadRequest(w, "creating wordle cheater", err)
+		return
+	}
 	p := Page{
 		Name:    "spelling_bee",
 		Title:   "Spelling Bee Cheater",
@@ -64,7 +70,7 @@ func spellingBeeCheater(w http.ResponseWriter, r *http.Request) {
 	handleTemplate(w, tmpl, p)
 }
 
-func handleError(w http.ResponseWriter, message string, err error) {
+func handleBadRequest(w http.ResponseWriter, message string, err error) {
 	message = fmt.Sprintf("%v: %v", message, err)
 	http.Error(w, message, http.StatusBadRequest)
 }
@@ -72,7 +78,7 @@ func handleError(w http.ResponseWriter, message string, err error) {
 func handleTemplate(w http.ResponseWriter, tmpl *template.Template, data any) {
 	buf := new(bytes.Buffer)
 	if err := tmpl.Execute(buf, data); err != nil {
-		handleError(w, "rendering template", err)
+		handleBadRequest(w, "rendering template", err)
 		return
 	}
 	buf.WriteTo(w)

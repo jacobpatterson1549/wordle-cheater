@@ -7,7 +7,6 @@
         minLength="6" maxLength="6" pattern="[a-z]{6}" value="{{.OtherLetters}}" placeholder="a-z (6x)">
     <input type="submit">
 </form>
-{{- range .Output}}<p class="output">{{.}}<p>{{end}}
 {{- if ne (len .OtherLetters) 0}}
 {{- with .Summary}}
 <div style="max-height: 55vh; overflow-y: auto">
@@ -22,7 +21,7 @@
     <tr>
         <td>{{.Value}}</td>
         <td>{{.Score}}</td>
-        <td>{{.IsPangram}}</td>
+        <td>{{.Details}}</td>
     </tr>
     {{- end}}
     <tfoot>
