@@ -4,8 +4,8 @@ import (
 	"bytes"
 	"embed"
 	"fmt"
+	"html/template"
 	"net/http"
-	"text/template"
 )
 
 //go:embed main.html main.css wordle.html spelling_bee.html
@@ -17,6 +17,11 @@ type handler struct {
 	tmpl      *template.Template
 }
 
+const (
+	wordlePath      = "/"
+	spellingBeePath = "/spelling-bee"
+)
+
 func NewHandler(wordsText string) http.Handler {
 	mux := http.NewServeMux()
 
@@ -26,7 +31,7 @@ func NewHandler(wordsText string) http.Handler {
 	funcs := template.FuncMap{
 		"inc": inc,
 	}
-	tmpl := template.Must(template.New("main.html").
+	tmpl := template.Must(newTemplate().
 		Funcs(funcs).
 		ParseFS(_siteFS, "*.html", "*.css"))
 
@@ -36,8 +41,8 @@ func NewHandler(wordsText string) http.Handler {
 		tmpl:      tmpl,
 	}
 
-	mux.Handle("GET /{$}", h.wordleCheater())
-	mux.Handle("GET /spelling-bee", h.spellingBeeCheater())
+	mux.HandleFunc("GET "+wordlePath+"{$}", h.wordleCheater())
+	mux.HandleFunc("GET "+spellingBeePath, h.spellingBeeCheater())
 	return h
 }
 
@@ -68,7 +73,7 @@ func (h handler) spellingBeeCheater() http.HandlerFunc {
 		q := r.URL.Query()
 		c, err := RunSpellingBeeCheater(q, h.wordsText)
 		if err != nil {
-			handleBadRequest(w, "creating wordle cheater", err)
+			handleBadRequest(w, "creating spelling bee cheater", err)
 			return
 		}
 		p := Page{
@@ -80,11 +85,6 @@ func (h handler) spellingBeeCheater() http.HandlerFunc {
 	}
 }
 
-func handleBadRequest(w http.ResponseWriter, message string, err error) {
-	message = fmt.Sprintf("%v: %v", message, err)
-	http.Error(w, message, http.StatusBadRequest)
-}
-
 func (h handler) handleTemplate(w http.ResponseWriter, data any) {
 	buf := new(bytes.Buffer)
 	if err := h.tmpl.Execute(buf, data); err != nil {
@@ -92,6 +92,17 @@ func (h handler) handleTemplate(w http.ResponseWriter, data any) {
 		return
 	}
 	buf.WriteTo(w)
+}
+
+func handleBadRequest(w http.ResponseWriter, message string, err error) {
+	message = fmt.Sprintf("%v: %v", message, err)
+	http.Error(w, message, http.StatusBadRequest)
+}
+
+func newTemplate() *template.Template {
+	tmpl := template.New("main.html")
+	tmpl.Option("missingkey=error")
+	return tmpl
 }
 
 type Page struct {
