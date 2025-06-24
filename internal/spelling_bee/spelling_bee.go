@@ -12,8 +12,11 @@ type (
 		CentralLetter rune
 		OtherLetters  string
 		MinLength     int
-		validLetters  char_set.CharSet
-		numLetters    int
+	}
+	wordsConfig struct {
+		sb           SpellingBee
+		validLetters char_set.CharSet
+		numLetters   int
 	}
 	Word struct {
 		Value     string
@@ -24,12 +27,12 @@ type (
 
 func (sb SpellingBee) Words(wordsTextFile string) []Word {
 	lines := strings.Fields(wordsTextFile)
-	sb.init()
+	cfg := sb.newWordsConfig()
 	var words []Word
 	for _, value := range lines {
-		letters := sb.letters(value)
+		letters := cfg.letters(value)
 		if letters != 0 {
-			w := sb.newWord(value, letters)
+			w := cfg.newWord(value, letters)
 			words = append(words, w)
 		}
 	}
@@ -37,48 +40,50 @@ func (sb SpellingBee) Words(wordsTextFile string) []Word {
 	return words
 }
 
-func (sb *SpellingBee) init() {
-	sb.validLetters = 0
+func (sb SpellingBee) newWordsConfig() wordsConfig {
+	var cfg wordsConfig
 	if !lowercase(sb.CentralLetter) {
-		return
+		return cfg
 	}
-	sb.validLetters.Add(sb.CentralLetter)
+	cfg.validLetters.Add(sb.CentralLetter)
 	for _, r := range sb.OtherLetters {
 		if lowercase(r) {
-			sb.validLetters.Add(r)
+			cfg.validLetters.Add(r)
 		}
 	}
-	sb.numLetters = sb.validLetters.Length()
+	cfg.numLetters = cfg.validLetters.Length()
+	cfg.sb = sb
+	return cfg
 }
 
-func (sb SpellingBee) letters(value string) char_set.CharSet {
-	if len(value) < sb.MinLength {
+func (cfg wordsConfig) letters(value string) char_set.CharSet {
+	if len(value) < cfg.sb.MinLength {
 		return 0
 	}
 	var letters char_set.CharSet
 	for _, r := range value {
-		if !sb.validLetters.Has(r) {
+		if !cfg.validLetters.Has(r) {
 			return 0
 		}
 		letters.Add(r)
 	}
-	if !letters.Has(sb.CentralLetter) {
+	if !letters.Has(cfg.sb.CentralLetter) {
 		return 0
 	}
 	return letters
 }
 
-func (sb *SpellingBee) newWord(value string, letters char_set.CharSet) Word {
+func (cfg wordsConfig) newWord(value string, letters char_set.CharSet) Word {
 	w := Word{
 		Value:     value,
 		Score:     1,
-		IsPangram: letters == sb.validLetters,
+		IsPangram: letters == cfg.validLetters,
 	}
-	if sb.MinLength < len(value) {
+	if cfg.sb.MinLength < len(value) {
 		w.Score += len(value) - 1
 	}
 	if w.IsPangram {
-		w.Score += sb.numLetters
+		w.Score += cfg.numLetters
 	}
 	return w
 }
