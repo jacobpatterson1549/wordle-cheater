@@ -8,19 +8,17 @@ import (
 	"text/template"
 )
 
-var (
-	handler http.Handler
-	tmpl    *template.Template
+//go:embed main.html main.css wordle.html spelling_bee.html
+var _siteFS embed.FS
 
-	//go:embed main.html main.css wordle.html spelling_bee.html
-	_siteFS embed.FS
-)
+type handler struct {
+	wordsText string
+	mux       http.Handler
+	tmpl      *template.Template
+}
 
 func NewHandler(wordsText string) http.Handler {
 	mux := http.NewServeMux()
-	mux.HandleFunc("GET /{$}", wordleCheater(wordsText))
-	mux.HandleFunc("GET /spelling-bee", spellingBeeCheater(wordsText))
-	handler = mux
 
 	inc := func(i int) int {
 		return i + 1
@@ -28,23 +26,30 @@ func NewHandler(wordsText string) http.Handler {
 	funcs := template.FuncMap{
 		"inc": inc,
 	}
-	tmpl = template.Must(template.New("main.html").
+	tmpl := template.Must(template.New("main.html").
 		Funcs(funcs).
 		ParseFS(_siteFS, "*.html", "*.css"))
-	tmpl.Funcs(funcs)
-	return handler
+
+	h := handler{
+		wordsText: wordsText,
+		mux:       mux,
+		tmpl:      tmpl,
+	}
+
+	mux.Handle("GET /{$}", h.wordleCheater())
+	mux.Handle("GET /spelling-bee", h.spellingBeeCheater())
+	return h
 }
 
-func ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	h := handler
-	h = withContentEncoding(h)
-	h.ServeHTTP(w, r)
+func (h handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	withContentEncoding(h.mux).
+		ServeHTTP(w, r)
 }
 
-func wordleCheater(wordsText string) http.HandlerFunc {
+func (h handler) wordleCheater() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		q := r.URL.Query()
-		c, err := RunWordleCheater(q, wordsText)
+		c, err := RunWordleCheater(q, h.wordsText)
 		if err != nil {
 			handleBadRequest(w, "creating wordle cheater", err)
 			return
@@ -54,14 +59,14 @@ func wordleCheater(wordsText string) http.HandlerFunc {
 			Title:   "Wordle Cheater",
 			Cheater: *c,
 		}
-		handleTemplate(w, tmpl, p)
+		h.handleTemplate(w, p)
 	}
 }
 
-func spellingBeeCheater(wordsText string) http.HandlerFunc {
+func (h handler) spellingBeeCheater() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		q := r.URL.Query()
-		c, err := RunSpellingBeeCheater(q, wordsText)
+		c, err := RunSpellingBeeCheater(q, h.wordsText)
 		if err != nil {
 			handleBadRequest(w, "creating wordle cheater", err)
 			return
@@ -71,7 +76,7 @@ func spellingBeeCheater(wordsText string) http.HandlerFunc {
 			Title:   "Spelling Bee Cheater",
 			Cheater: c,
 		}
-		handleTemplate(w, tmpl, p)
+		h.handleTemplate(w, p)
 	}
 }
 
@@ -80,9 +85,9 @@ func handleBadRequest(w http.ResponseWriter, message string, err error) {
 	http.Error(w, message, http.StatusBadRequest)
 }
 
-func handleTemplate(w http.ResponseWriter, tmpl *template.Template, data any) {
+func (h handler) handleTemplate(w http.ResponseWriter, data any) {
 	buf := new(bytes.Buffer)
-	if err := tmpl.Execute(buf, data); err != nil {
+	if err := h.tmpl.Execute(buf, data); err != nil {
 		handleBadRequest(w, "rendering template", err)
 		return
 	}
