@@ -131,6 +131,13 @@ func TestRunWordleCheater(t *testing.T) {
 				"g1": {"forts"},
 				"s1": {"ccccn"},
 			},
+			wantOk: true,
+			want: WordleCheater{
+				Results: []result.Result{
+					{Guess: "forts", Score: "ccccn"},
+					{},
+				},
+			},
 		},
 		{
 			name: "extra guess",

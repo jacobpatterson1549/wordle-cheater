@@ -10,14 +10,12 @@ import (
 	"github.com/jacobpatterson1549/wordle-cheater/internal/wordle/score"
 )
 
-type (
-	WordleCheater struct {
-		Results      []result.Result
-		Possible     []string
-		ShowPossible bool
-		Done         bool
-	}
-)
+type WordleCheater struct {
+	Results      []result.Result
+	Possible     []string
+	ShowPossible bool
+	Done         bool
+}
 
 func RunWordleCheater(query map[string][]string) (*WordleCheater, error) {
 	return runWordleCheater(query, words.WordsTextFile)
@@ -47,43 +45,16 @@ func newWordleCheater(query map[string][]string, m words.Words) (*WordleCheater,
 
 	var wc WordleCheater
 	var h result.History
-	var anyWord words.Words
 
 	for i := range 10 {
-		guessKey := fmt.Sprintf("g%v", i)
-		scoreKey := fmt.Sprintf("s%v", i)
-
-		gI, gOk := query[guessKey]
-		sI, sOk := query[scoreKey]
-		if !gOk || !sOk {
-			break
+		r, err := parseResult(query, i)
+		switch {
+		case err != nil:
+			return nil, err
+		case r != nil:
+			h.AddResult(*r, &m)
+			wc.Results = append(wc.Results, *r)
 		}
-		guessSingle := gI[0]
-		scoreSingle := sI[0]
-
-		delete(query, guessKey)
-		delete(query, scoreKey)
-
-		g := guess.New(guessSingle)
-		s := score.New(scoreSingle)
-
-		if len(guessSingle) == 0 && len(scoreSingle) == 0 {
-			continue
-		}
-		if err := g.Validate(anyWord); err != nil {
-			return nil, fmt.Errorf("reading guess: %w", err)
-		}
-
-		if err := s.Validate(); err != nil {
-			return nil, fmt.Errorf("reading score: %w", err)
-		}
-
-		r := result.Result{
-			Guess: g,
-			Score: s,
-		}
-		h.AddResult(r, &m)
-		wc.Results = append(wc.Results, r)
 	}
 
 	if _, ok := query["ShowPossible"]; ok {
@@ -110,4 +81,41 @@ func newWordleCheater(query map[string][]string, m words.Words) (*WordleCheater,
 	}
 
 	return &wc, nil
+}
+
+func parseResult(query map[string][]string, i int) (*result.Result, error) {
+	guessKey := fmt.Sprintf("g%v", i)
+	scoreKey := fmt.Sprintf("s%v", i)
+
+	gI, gOk := query[guessKey]
+	sI, sOk := query[scoreKey]
+	if !gOk || !sOk {
+		return nil, nil
+	}
+	guessSingle := gI[0]
+	scoreSingle := sI[0]
+
+	delete(query, guessKey)
+	delete(query, scoreKey)
+
+	g := guess.New(guessSingle)
+	s := score.New(scoreSingle)
+
+	if len(guessSingle) == 0 && len(scoreSingle) == 0 {
+		return nil, nil
+	}
+	var anyWord words.Words
+	if err := g.Validate(anyWord); err != nil {
+		return nil, fmt.Errorf("reading guess: %w", err)
+	}
+
+	if err := s.Validate(); err != nil {
+		return nil, fmt.Errorf("reading score: %w", err)
+	}
+
+	r := result.Result{
+		Guess: g,
+		Score: s,
+	}
+	return &r, nil
 }
