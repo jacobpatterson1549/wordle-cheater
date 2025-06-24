@@ -1,5 +1,10 @@
 # wordle-cheater
 
+[![Docker Image CI](https://github.com/jacobpatterson1549/wordle-cheater/actions/workflows/docker-image.yml/badge.svg)](https://github.com/jacobpatterson1549/wordle-cheater/actions/workflows/docker-image.yml)
+[![Go Report Card](https://goreportcard.com/badge/github.com/jacobpatterson1549/wordle-cheater)](https://goreportcard.com/report/github.com/jacobpatterson1549/wordle-cheater)
+[![GoDoc](https://godoc.org/github.com/jacobpatterson1549/wordle-cheater?status.svg)](https://godoc.org/github.com/jacobpatterson1549/wordle-cheater)
+
+
 A command-line application that can help users play [Wordle](https://www.powerlanguage.co.uk/wordle).
 
 The application shows possible words after combining the results of previous guesses/scores that are entered by the user.
