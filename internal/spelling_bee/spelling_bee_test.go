@@ -9,14 +9,14 @@ func TestGetScores(t *testing.T) {
 	tests := []struct {
 		name          string
 		sb            SpellingBee
-		wordsTextFile string
+		wordsText string
 		want          []Word
 	}{
 		{},
 		{
 			name:          "20250621",
 			sb:            SpellingBee{CentralLetter: 'e', OtherLetters: "hcking", MinLength: 4},
-			wordsTextFile: "stuff inching chicken checking hen nice electro",
+			wordsText: "stuff inching chicken checking hen nice electro",
 			want: []Word{
 				{Score: 1, Value: "nice"},
 				{Score: 7, Value: "chicken"},
@@ -26,7 +26,7 @@ func TestGetScores(t *testing.T) {
 		{
 			name:          "trimOtherLetters",
 			sb:            SpellingBee{CentralLetter: 'f', OtherLetters: "nun"},
-			wordsTextFile: "fun",
+			wordsText: "fun",
 			want: []Word{
 				{Score: 6, Value: "fun", IsPangram: true},
 			},
@@ -34,7 +34,7 @@ func TestGetScores(t *testing.T) {
 	}
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
-			got := test.sb.Words(test.wordsTextFile)
+			got := test.sb.Words(test.wordsText)
 			if want, got := test.want, got; !slices.Equal(want, got) {
 				t.Errorf("not equal: \n wanted: %v \n    got: %v", want, got)
 			}

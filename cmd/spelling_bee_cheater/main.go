@@ -11,7 +11,6 @@ import (
 
 func main() {
 	runSpellingBee(os.Stdin, os.Stdout)
-
 }
 
 func runSpellingBee(r io.Reader, w io.Writer) {

@@ -4,7 +4,6 @@ import (
 	"reflect"
 	"testing"
 
-	words "github.com/jacobpatterson1549/wordle-cheater"
 	"github.com/jacobpatterson1549/wordle-cheater/internal/spelling_bee"
 )
 
@@ -82,7 +81,8 @@ func TestRunSpellingBeeCheater(t *testing.T) {
 	}
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
-			got, err := RunSpellingBeeCheater(test.query)
+			var wordsText string
+			got, err := RunSpellingBeeCheater(test.query, wordsText)
 			switch {
 			case err != nil:
 				if test.wantOk {
@@ -98,15 +98,15 @@ func TestRunSpellingBeeCheater(t *testing.T) {
 }
 
 func TestSpellingBeeCheaterSummary(t *testing.T) {
-	o := words.WordsTextFile
-	defer func() { words.WordsTextFile = o }()
-	words.WordsTextFile = "bad apple yam may hi an my am a mamy"
 	sb := spelling_bee.SpellingBee{
 		CentralLetter: 'a',
 		OtherLetters:  "my",
 		MinLength:     2,
 	}
-	c := SpellingBeeCheater{sb}
+	c := SpellingBeeCheater{
+		SpellingBee: sb,
+		wordsText:   "bad apple yam may hi an my am a mamy",
+	}
 	details := "PANGRAM!"
 	want := Summary{
 		TotalScore:   20,

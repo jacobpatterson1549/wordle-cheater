@@ -25,8 +25,8 @@ type (
 	}
 )
 
-func (sb SpellingBee) Words(wordsTextFile string) []Word {
-	lines := strings.Fields(wordsTextFile)
+func (sb SpellingBee) Words(wordsText string) []Word {
+	lines := strings.Fields(wordsText)
 	cfg := sb.newWordsConfig()
 	var words []Word
 	for _, value := range lines {

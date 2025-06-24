@@ -10,12 +10,7 @@ import (
 	"github.com/jacobpatterson1549/wordle-cheater/internal/wordle/score"
 )
 
-// runWordleCheater runs an interactive wordle-cheater on the ReaderWriter using the defaulttext for the words
-func RunWordleCheater(rw io.ReadWriter) error {
-	return runWordleCheater(rw, words.WordsTextFile)
-}
-
-func runWordleCheater(rw io.ReadWriter, wordsText string) error {
+func RunWordleCheater(rw io.ReadWriter, wordsText string) error {
 	const numLetters = 5
 	allWords, err := words.New(wordsText)
 	if err != nil {

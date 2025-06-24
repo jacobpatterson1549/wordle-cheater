@@ -5,38 +5,8 @@ import (
 	"strconv"
 	"testing"
 
-	words "github.com/jacobpatterson1549/wordle-cheater"
 	"github.com/jacobpatterson1549/wordle-cheater/internal/wordle/result"
 )
-
-func TestRunWordleCheaterPublic(t *testing.T) {
-	o := words.WordsTextFile
-	defer func() { words.WordsTextFile = o }()
-	tests := []struct {
-		words  string
-		wantOk bool
-	}{
-		{wantOk: true},
-		{words: "words", wantOk: true},
-		{words: "Words"},
-	}
-	for _, test := range tests {
-		t.Run(test.words, func(t *testing.T) {
-			words.WordsTextFile = test.words
-			got, err := RunWordleCheater(nil)
-			switch {
-			case err != nil:
-				if test.wantOk {
-					t.Error(err)
-				}
-			case !test.wantOk:
-				t.Errorf("wanted error")
-			case got == nil:
-				t.Errorf("wanted cheater: %v", got)
-			}
-		})
-	}
-}
 
 func TestRunWordleCheater(t *testing.T) {
 	tests := []struct {
@@ -174,7 +144,7 @@ func TestRunWordleCheater(t *testing.T) {
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
 			words := "forte forth forts forty"
-			got, err := runWordleCheater(test.query, words)
+			got, err := RunWordleCheater(test.query, words)
 			switch {
 			case !test.wantOk:
 				if err == nil {
@@ -189,7 +159,13 @@ func TestRunWordleCheater(t *testing.T) {
 	}
 }
 
-func TestRunWordleCheaterGuesssCount(t *testing.T) {
+func TestRunWordleCheaterBadWordsText(t *testing.T) {
+	if _, err := RunWordleCheater(map[string][]string{}, "Words"); err == nil {
+		t.Errorf("wanted error running with capitalized word")
+	}
+}
+
+func TestRunWordleCheaterGuessCount(t *testing.T) {
 	t.Run("guessCount", func(t *testing.T) {
 		tests := []struct {
 			n        int
@@ -207,8 +183,8 @@ func TestRunWordleCheaterGuesssCount(t *testing.T) {
 					query["g"+strconv.Itoa(i)] = []string{"xxxx" + string(byte('a'+i))}
 					query["s"+strconv.Itoa(i)] = []string{"nnnnn"}
 				}
-				wordsTextFile := "xxxxa xxxxb xxxxc xxxxd xxxxe xxxxf xxxxg xxxxh xxxxi xxxxj"
-				got, err := runWordleCheater(query, wordsTextFile)
+				wordsText := "xxxxa xxxxb xxxxc xxxxd xxxxe xxxxf xxxxg xxxxh xxxxi xxxxj"
+				got, err := RunWordleCheater(query, wordsText)
 				switch {
 				case err != nil:
 					t.Errorf("unwanted error: %v", err)
