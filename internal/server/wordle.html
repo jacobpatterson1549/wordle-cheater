@@ -1,12 +1,14 @@
-<form method="get">
-    {{range $i, $r := .Results }}
+<form method="get" hx-boost="true" hx-target="this" hx-swap="outerHTML">
+    <input hidden name="NoJS" type="checkbox" {{- if .NoJS}}checked{{end}}>
+    {{- with .Cheater}}
+    {{- range $i, $r := .Results }}
     <label for="g{{$i}}">Guess {{inc $i}}:</label>
     <input id="g{{$i}}" name="g{{$i}}" type="text" required
         min-length="5" maxLength="5" pattern="[a-z]{5}" value="{{$r.Guess}}" placeholder="a-z (5x)">
     <label for="s{{$i}}">Score {{inc $i}}:</label>
     <input id="s{{$i}}" name="s{{$i}}" type="text" required
         min-length="5" maxLength="5"  pattern="[can]{5}" value="{{$r.Score}}" placeholder="c/a/n (5x)">
-    {{end}}
+    {{- end}}
     {{- if .Done}}
     <a href=".">Reset</a>
     {{- else}}
@@ -17,5 +19,6 @@
     <label for="ShowPossible">Show Possible words</label>
     <input id="ShowPossible" name="ShowPossible" type="checkbox" {{- if .ShowPossible}}checked{{end}}>
     <input type="submit">
+    {{- end}}
     {{- end}}
 </form>

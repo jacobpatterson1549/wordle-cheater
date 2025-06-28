@@ -1,4 +1,6 @@
-<form method="get">
+<form method="get" hx-boost="true" hx-target="#sbc-form-response">
+    <input hidden name="NoJS" type="checkbox" {{- if .NoJS}}checked{{end}}>
+    {{- with .Cheater}}
     <label for="central-Letter">Central Letter:</label>
     <input id="central-letter" name="central-letter" type="text" required
         minLength="1" maxLength="1" pattern="[a-z]{1}"{{- with .CentralLetter}} value='{{printf "%c" .}}'{{end}} placeholder="a-z (1x)">
@@ -6,10 +8,13 @@
     <input id="other-letters" name="other-letters" type="text" required
         minLength="6" maxLength="6" pattern="[a-z]{6}" value="{{.OtherLetters}}" placeholder="a-z (6x)">
     <input type="submit">
+    {{- end}}
 </form>
+<div style="max-height: 55vh; overflow-y: auto" id="sbc-form-response">
+{{- block "sbc-response" .}}
+{{- with .Cheater}}
 {{- if ne (len .OtherLetters) 0}}
 {{- with .Summary}}
-<div style="max-height: 55vh; overflow-y: auto">
 <table>
     <caption>Word Details</caption>
     <thead>
@@ -33,3 +38,6 @@
 </div>
 {{- end}}
 {{- end}}
+{{- end}}
+{{- end}}
+</div>

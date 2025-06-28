@@ -7,6 +7,9 @@
 	<meta name="Description" content="a collection of word game cheating tools">
 	<title>{{.Title}}</title>
 	<link rel="shortcut icon" href="data:image/x-icon;base64," type="image/x-icon">
+	{{- if not .NoJS}}
+	<script defer src="https://cdn.jsdelivr.net/npm/htmx.org@2.0.6/dist/htmx.min.js"></script>
+	{{- end}}
 	<style>
 		{{template "main.css" .}}
 	</style>
@@ -22,10 +25,18 @@
 	</header>
 	<main>
 		{{- if .IsWordle}}
-		{{template "wordle.html" .Cheater}}
+		{{template "wordle.html" .}}
 		{{- else if .IsSpellingBee}}
-		{{template "spelling_bee.html" .Cheater}}
+		{{template "spelling_bee.html" .}}
 		{{- end}}
+
+		<p>
+			{{- if .NoJS}}
+			<a href="?">With JavaScript</a>
+			{{- else }}
+			<a href="?NoJS">Without JavaScript</a>
+			{{- end}}
+		</p>
 	</main>
     <footer>
 		<a href="https://jacobpatterson1549.dev/">Homepage</a>

@@ -95,18 +95,56 @@ func TestHandleTemplateError(t *testing.T) {
 	}
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
-
-			h := Handler{
-				tmpl: template.Must(newTemplate().Parse("{{.A}}")),
-			}
+			tmpl := template.Must(newTemplate().Parse("{{.A}}"))
 			w := httptest.NewRecorder()
-			h.handleTemplate(w, test.data)
+			handleTemplate(tmpl, w, test.data)
 			if want, got := test.wantCode, w.Result().StatusCode; want != got {
 				t.Errorf("status codes: wanted %v, got %v", want, got)
 			}
 			got := w.Body.String()
 			if !strings.HasPrefix(got, test.wantBodyStart) {
 				t.Errorf("response body: wanted prefix: %q got: %q", test.wantBodyStart, got)
+			}
+		})
+	}
+}
+
+func TestHandleCheaterHtmx(t *testing.T) {
+	tests := []struct {
+		name    string
+		headers map[string]string
+		want    string
+	}{
+		{"all", nil, "OuterInner"},
+		{"inner only", map[string]string{htmxHeader: "true"}, "Inner"},
+	}
+	pageTypes := []pageType{wordle_type, spelling_bee_type}
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			for _, pt := range pageTypes {
+				t.Run(fmt.Sprint(pt), func(t *testing.T) {
+					r := httptest.NewRequest("GET", "/", nil)
+					for k, v := range test.headers {
+						r.Header.Add(k, v)
+					}
+					w := httptest.NewRecorder()
+					name := pt.HtmxTemplateName()
+					text := `Outer{{block "` + name + `" .}}Inner{{end}}`
+					tmpl := template.Must(template.New("").Parse(text))
+					h := Handler{
+						tmpl: tmpl,
+					}
+					fn := h.handleCheater(pt)
+					fn(w, r)
+					statusCode := w.Code
+					want, got := test.want, w.Body.String()
+					switch {
+					case statusCode != 200:
+						t.Errorf("bad status: %v", statusCode)
+					case want != got:
+						t.Errorf("response bodies: \n wanted: %q \n    got: %q", want, got)
+					}
+				})
 			}
 		})
 	}
