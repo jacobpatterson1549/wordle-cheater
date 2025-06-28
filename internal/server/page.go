@@ -2,6 +2,7 @@ package server
 
 type (
 	Page struct {
+		NoJS bool
 		pageType
 		Cheater any
 	}
@@ -40,6 +41,15 @@ func (pt pageType) cheater(query map[string][]string, wordsText string) (any, er
 		return RunSpellingBeeCheater(query, wordsText)
 	default:
 		return RunWordleCheater(query, wordsText)
+	}
+}
+
+func (pt pageType) HtmxTemplateName() string {
+	switch pt {
+	case spelling_bee_type:
+		return "sbc-response"
+	default:
+		return "wordle.html"
 	}
 }
 

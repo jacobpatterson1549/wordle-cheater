@@ -20,6 +20,7 @@ type Handler struct {
 const (
 	wordlePath      = "/"
 	spellingBeePath = "/spelling-bee"
+	htmxHeader      = "Hx-Request"
 )
 
 func NewHandler(wordsText string) Handler {
@@ -59,13 +60,20 @@ func (h Handler) handleCheater(pt pageType) http.HandlerFunc {
 			handleBadRequest(w, "creating cheater", err)
 			return
 		}
-		h.handleTemplate(w, p)
+		p.NoJS = q.Has("NoJS")
+		_, htmx := r.Header[htmxHeader]
+		tmpl := h.tmpl
+		if htmx {
+			tmplName := p.HtmxTemplateName()
+			tmpl = tmpl.Lookup(tmplName)
+		}
+		handleTemplate(tmpl, w, p)
 	}
 }
 
-func (h Handler) handleTemplate(w http.ResponseWriter, data any) {
+func handleTemplate(tmpl *template.Template, w http.ResponseWriter, data any) {
 	buf := new(bytes.Buffer)
-	if err := h.tmpl.Execute(buf, data); err != nil {
+	if err := tmpl.Execute(buf, data); err != nil {
 		handleBadRequest(w, "rendering template", err)
 		return
 	}
