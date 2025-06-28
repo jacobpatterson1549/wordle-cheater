@@ -54,11 +54,6 @@ func newWordleCheater(query map[string][]string, m words.Words) (*WordleCheater,
 
 	if _, ok := query["ShowPossible"]; ok {
 		wc.ShowPossible = true
-		delete(query, "ShowPossible")
-	}
-
-	if len(query) != 0 {
-		return nil, fmt.Errorf("unparsed query params: %v total", len(query))
 	}
 
 	wc.Done = len(wc.Results) >= 9 ||
@@ -89,9 +84,6 @@ func parseResult(query map[string][]string, i int) (*result.Result, error) {
 	}
 	guessSingle := gI[0]
 	scoreSingle := sI[0]
-
-	delete(query, guessKey)
-	delete(query, scoreKey)
 
 	g := guess.New(guessSingle)
 	s := score.New(scoreSingle)

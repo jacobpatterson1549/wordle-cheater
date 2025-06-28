@@ -27,7 +27,11 @@ func TestRunWordleCheater(t *testing.T) {
 		{
 			name: "unexpected param",
 			query: map[string][]string{
-				"unknown": nil,
+				"unknown": {"ignore"},
+			},
+			wantOk: true,
+			want: WordleCheater{
+				Results: []result.Result{{}},
 			},
 		},
 		{
@@ -117,6 +121,13 @@ func TestRunWordleCheater(t *testing.T) {
 				"s0": {"ccccn"},
 				"g1": {"forts"},
 			},
+			wantOk: true,
+			want: WordleCheater{
+				Results: []result.Result{
+					{Guess: "forts", Score: "ccccn"},
+					{},
+				},
+			},
 		},
 		{
 			name: "extra score",
@@ -124,6 +135,13 @@ func TestRunWordleCheater(t *testing.T) {
 				"g0": {"forts"},
 				"s0": {"ccccn"},
 				"s1": {"ccccn"},
+			},
+			wantOk: true,
+			want: WordleCheater{
+				Results: []result.Result{
+					{Guess: "forts", Score: "ccccn"},
+					{},
+				},
 			},
 		},
 		{
