@@ -31,7 +31,7 @@ $(BIN_DIR)/%: $(BUILD_DIR)/$(COVERAGE_OBJ)
 			-o $@
 
 $(BUILD_DIR)/$(COVERAGE_OBJ): $(SRC) $(BUILD_DIR)/$(WORDS_OBJ) | $(BUILD_DIR)
-	go test ./... -coverprofile=$@
+	go test ./... -covermode=count -coverprofile=$@
 
 $(BUILD_DIR)/$(WORDS_OBJ): | $(BUILD_DIR)
 	aspell -d en_US dump master \
