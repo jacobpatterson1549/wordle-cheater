@@ -63,7 +63,7 @@ func TestNewHandler(t *testing.T) {
 			r := httptest.NewRequest("GET", test.target, nil)
 			h.ServeHTTP(w, r)
 			if want, got := test.wantCode, w.Result().StatusCode; want != got {
-				t.Errorf("wanted %v, got %v", want, got)
+				t.Errorf("wanted %v, got %v (body: %q)", want, got, w.Body.String())
 			}
 		})
 	}
@@ -96,7 +96,7 @@ func TestHandleTemplateError(t *testing.T) {
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
 
-			h := handler{
+			h := Handler{
 				tmpl: template.Must(newTemplate().Parse("{{.A}}")),
 			}
 			w := httptest.NewRecorder()

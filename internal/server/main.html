@@ -16,14 +16,14 @@
     <header>
 	<h1><a href="?">{{.Title}}</a></h1>
 	<nav>
-		<a {{if not (eq .Name "wordle")}}href="/"{{end}}>Wordle-Cheater</a>
-		<a {{if not (eq .Name "spelling_bee")}}href="/spelling-bee"{{end}}>Spelling-Bee-Cheater</a>
+		<a {{if not .IsWordle}}href="/"{{end}}>Wordle-Cheater</a>
+		<a {{if not .IsSpellingBee}}href="/spelling-bee"{{end}}>Spelling-Bee-Cheater</a>
 	</nav>
 	</header>
 	<main>
-		{{- if eq .Name "wordle"}}
+		{{- if .IsWordle}}
 		{{template "wordle.html" .Cheater}}
-		{{- else if eq .Name "spelling_bee"}}
+		{{- else if .IsSpellingBee}}
 		{{template "spelling_bee.html" .Cheater}}
 		{{- end}}
 	</main>
