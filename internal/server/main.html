@@ -19,8 +19,8 @@
     <header>
 	<h1><a href="?">{{.Title}}</a></h1>
 	<nav>
-		<a {{if not .IsWordle}}href="/"{{end}}>Wordle-Cheater</a>
-		<a {{if not .IsSpellingBee}}href="/spelling-bee"{{end}}>Spelling-Bee-Cheater</a>
+		{{if .IsWordle}}<span>{{else}}<a href="/">{{end}}Wordle-Cheater{{if .IsWordle}}</span>{{else}}</a>{{end}}
+		{{if .IsSpellingBee}}<span>{{else}}<a href="/spelling-bee">{{end}}Spelling-Bee-Cheater{{if .IsSpellingBee}}</span>{{else}}</a>{{end}}
 	</nav>
 	</header>
 	<main>
