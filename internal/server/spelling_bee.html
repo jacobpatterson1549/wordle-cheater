@@ -13,8 +13,7 @@
 <div style="max-height: 55vh; overflow-y: auto" id="sbc-form-response">
 {{- block "sbc-response" .}}
 {{- with .Cheater}}
-{{- if ne (len .OtherLetters) 0}}
-{{- with .Summary}}
+{{- if .Words}}
 <table>
     <caption>Word Details</caption>
     <thead>
@@ -36,7 +35,6 @@
     </tfoot>
 </table>
 </div>
-{{- end}}
 {{- end}}
 {{- end}}
 {{- end}}

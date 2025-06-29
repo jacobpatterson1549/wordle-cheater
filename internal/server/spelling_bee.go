@@ -11,9 +11,6 @@ import (
 type (
 	SpellingBeeCheater struct {
 		spelling_bee.SpellingBee
-		wordsText string
-	}
-	Summary struct {
 		TotalScore   int
 		PangramCount int
 		Words        []Word
@@ -30,7 +27,16 @@ const (
 	otherLettersParam  = "other-letters"
 )
 
-func RunSpellingBeeCheater(query map[string][]string, wordsText string) (*SpellingBeeCheater, error) {
+func NewSpellingBeeCheater(query map[string][]string, wordsText string) (*SpellingBeeCheater, error) {
+	sb, err := newSpellingBee(query)
+	if err != nil {
+		return nil, err
+	}
+	sbc := newSpellingBeeCheater(*sb, wordsText)
+	return sbc, nil
+}
+
+func newSpellingBee(query map[string][]string) (*spelling_bee.SpellingBee, error) {
 	centralLetters, err1 := parseParam(centralLetterParam, 1, query)
 	otherLetters, err2 := parseParam(otherLettersParam, 6, query)
 	if err := cmp.Or(err1, err2); err != nil {
@@ -46,11 +52,7 @@ func RunSpellingBeeCheater(query map[string][]string, wordsText string) (*Spelli
 	for _, r := range centralLetters {
 		sb.CentralLetter = r
 	}
-	sbc := SpellingBeeCheater{
-		SpellingBee: sb,
-		wordsText:   wordsText,
-	}
-	return &sbc, nil
+	return &sb, nil
 }
 
 func parseParam(paramName string, wantLength int, query map[string][]string) (string, error) {
@@ -66,19 +68,21 @@ func parseParam(paramName string, wantLength int, query map[string][]string) (st
 	return value[0], nil
 }
 
-func (sbc SpellingBeeCheater) Summary() Summary {
-	var s Summary
-	words := sbc.SpellingBee.Words(sbc.wordsText)
-	s.Words = make([]Word, len(words))
+func newSpellingBeeCheater(sb spelling_bee.SpellingBee, wordsText string) *SpellingBeeCheater {
+	sbc := SpellingBeeCheater{
+		SpellingBee: sb,
+	}
+	words := sb.Words(wordsText)
+	sbc.Words = make([]Word, len(words))
 	for i, w := range words {
-		s.Words[i].Value = w.Value
-		s.Words[i].Score = w.Score
-		s.TotalScore += w.Score
+		sbc.Words[i].Value = w.Value
+		sbc.Words[i].Score = w.Score
+		sbc.TotalScore += w.Score
 		if w.IsPangram {
-			s.Words[i].Details = "PANGRAM!"
-			s.PangramCount++
+			sbc.Words[i].Details = "PANGRAM!"
+			sbc.PangramCount++
 		}
 	}
-	slices.Reverse(s.Words)
-	return s
+	slices.Reverse(sbc.Words)
+	return &sbc
 }

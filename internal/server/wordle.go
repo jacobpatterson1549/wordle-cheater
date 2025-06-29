@@ -17,7 +17,7 @@ type WordleCheater struct {
 	Done         bool
 }
 
-func RunWordleCheater(query map[string][]string, wordsText string) (*WordleCheater, error) {
+func NewWordleCheater(query map[string][]string, wordsText string) (*WordleCheater, error) {
 	for k, v := range query {
 		if len(v) != 1 {
 			return nil, fmt.Errorf("wanted only one value for %q", k)

@@ -7,20 +7,18 @@ import (
 	"github.com/jacobpatterson1549/wordle-cheater/internal/spelling_bee"
 )
 
-func TestRunSpellingBeeCheater(t *testing.T) {
+func TestNewSpellingBee(t *testing.T) {
 	tests := []struct {
 		name   string
 		query  map[string][]string
 		wantOk bool
-		want   SpellingBeeCheater
+		want   spelling_bee.SpellingBee
 	}{
 		{
 			name:   "empty",
 			wantOk: true,
-			want: SpellingBeeCheater{
-				SpellingBee: spelling_bee.SpellingBee{
-					MinLength: 4,
-				},
+			want: spelling_bee.SpellingBee{
+				MinLength: 4,
 			},
 		},
 		{
@@ -30,12 +28,10 @@ func TestRunSpellingBeeCheater(t *testing.T) {
 				otherLettersParam:  {"bcdefg"},
 			},
 			wantOk: true,
-			want: SpellingBeeCheater{
-				SpellingBee: spelling_bee.SpellingBee{
-					CentralLetter: 'a',
-					OtherLetters:  "bcdefg",
-					MinLength:     4,
-				},
+			want: spelling_bee.SpellingBee{
+				CentralLetter: 'a',
+				OtherLetters:  "bcdefg",
+				MinLength:     4,
 			},
 		},
 		{
@@ -81,8 +77,7 @@ func TestRunSpellingBeeCheater(t *testing.T) {
 	}
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
-			var wordsText string
-			got, err := RunSpellingBeeCheater(test.query, wordsText)
+			got, err := newSpellingBee(test.query)
 			switch {
 			case err != nil:
 				if test.wantOk {
@@ -97,18 +92,16 @@ func TestRunSpellingBeeCheater(t *testing.T) {
 	}
 }
 
-func TestSpellingBeeCheaterSummary(t *testing.T) {
+func TestNewSpellingBeeCheater(t *testing.T) {
 	sb := spelling_bee.SpellingBee{
 		CentralLetter: 'a',
 		OtherLetters:  "my",
 		MinLength:     2,
 	}
-	c := SpellingBeeCheater{
-		SpellingBee: sb,
-		wordsText:   "bad apple yam may hi an my am a mamy",
-	}
+	wordsText := "bad apple yam may hi an my am a mamy"
 	details := "PANGRAM!"
-	want := Summary{
+	want := SpellingBeeCheater{
+		SpellingBee:  sb,
 		TotalScore:   20,
 		PangramCount: 3,
 		Words: []Word{
@@ -118,8 +111,8 @@ func TestSpellingBeeCheaterSummary(t *testing.T) {
 			{Score: 1, Value: "am"},
 		},
 	}
-	got := c.Summary()
-	if !reflect.DeepEqual(want, got) {
-		t.Errorf("not equal: \n wanted: %v \n    got: %v", want, got)
+	got := newSpellingBeeCheater(sb, wordsText)
+	if !reflect.DeepEqual(want, *got) {
+		t.Errorf("not equal: \n wanted: %v \n    got: %v", want, *got)
 	}
 }
