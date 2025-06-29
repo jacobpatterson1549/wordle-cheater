@@ -43,9 +43,9 @@ func NewHandler(wordsText string) Handler {
 		tmpl:      tmpl,
 	}
 
-	mux.HandleFunc("GET "+wordlePath+"{$}", h.handleCheater(wordle_type))
-	mux.HandleFunc("GET "+spellingBeePath, h.handleCheater(spelling_bee_type))
-	mux.HandleFunc("GET "+letterBoxedPath, h.handleCheater(letter_boxed_type))
+	mux.HandleFunc("GET "+wordlePath+"{$}", wordleType.handle(h))
+	mux.HandleFunc("GET "+spellingBeePath, spellingBeeType.handle(h))
+	mux.HandleFunc("GET "+letterBoxedPath, letterBoxedType.handle(h))
 	return h
 }
 
@@ -54,7 +54,7 @@ func (h Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		ServeHTTP(w, r)
 }
 
-func (h Handler) handleCheater(pt pageType) http.HandlerFunc {
+func (pt pageType[C]) handle(h Handler) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		q := r.URL.Query()
 		p, err := pt.newPage(q, h.wordsText)
@@ -64,13 +64,17 @@ func (h Handler) handleCheater(pt pageType) http.HandlerFunc {
 		}
 		p.NoJS = q.Has("NoJS")
 		_, htmx := r.Header[htmxHeader]
-		tmpl := h.tmpl
-		if htmx {
-			tmplName := p.HtmxTemplateName()
-			tmpl = tmpl.Lookup(tmplName)
-		}
+		tmpl := resolveTemplate(h.tmpl, htmx, p.HtmxTemplateName)
 		handleTemplate(tmpl, w, p)
 	}
+}
+
+func resolveTemplate(tmpl *template.Template, htmx bool, htmxTemplateName string) *template.Template {
+	if htmx {
+		tmplName := htmxTemplateName
+		tmpl = tmpl.Lookup(tmplName)
+	}
+	return tmpl
 }
 
 func handleTemplate(tmpl *template.Template, w http.ResponseWriter, data any) {

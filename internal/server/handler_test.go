@@ -124,42 +124,28 @@ func TestHandleTemplateError(t *testing.T) {
 	}
 }
 
-func TestHandleCheaterHtmx(t *testing.T) {
+func TestResolveTemplate(t *testing.T) {
 	tests := []struct {
-		name    string
-		headers map[string]string
-		want    string
+		name             string
+		htmx             bool
+		htmxTemplateName string
+		want             string
 	}{
-		{"all", nil, "OuterInner"},
-		{"inner only", map[string]string{htmxHeader: "true"}, "Inner"},
+		{"all", false, "", "OuterInner"},
+		{"inner only", true, "subTmpl", "Inner"},
 	}
-	pageTypes := []pageType{wordle_type, spelling_bee_type, letter_boxed_type}
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
-			for _, pt := range pageTypes {
-				t.Run(fmt.Sprint(pt), func(t *testing.T) {
-					r := httptest.NewRequest("GET", "/", nil)
-					for k, v := range test.headers {
-						r.Header.Add(k, v)
-					}
-					w := httptest.NewRecorder()
-					name := pt.HtmxTemplateName()
-					text := `Outer{{block "` + name + `" .}}Inner{{end}}`
-					tmpl := template.Must(template.New("").Parse(text))
-					h := Handler{
-						tmpl: tmpl,
-					}
-					fn := h.handleCheater(pt)
-					fn(w, r)
-					statusCode := w.Code
-					want, got := test.want, w.Body.String()
-					switch {
-					case statusCode != 200:
-						t.Errorf("bad status: %v", statusCode)
-					case want != got:
-						t.Errorf("response bodies: \n wanted: %q \n    got: %q", want, got)
-					}
-				})
+			text := `Outer{{block "subTmpl" .}}Inner{{end}}`
+			tmpl := template.Must(template.New("").Parse(text))
+			tmpl = resolveTemplate(tmpl, test.htmx, test.htmxTemplateName)
+			var sb strings.Builder
+			err := tmpl.Execute(&sb, nil)
+			if err != nil {
+				t.Fatalf("unwanted error: %v", err)
+			}
+			if want, got := test.want, sb.String(); want != got {
+				t.Errorf("wanted: %q got: %q", want, got)
 			}
 		})
 	}
