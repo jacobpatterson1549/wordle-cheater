@@ -1,0 +1,16 @@
+<form method="get" hx-boost="true" hx-target="#lbc-form-response">
+    <input hidden name="NoJS" type="checkbox" {{- if .NoJS}}checked{{end}}>
+    {{- with .Cheater}}
+    <label for="letters">Letters:</label>
+    <input id="letters" name="letters" type="text" required
+        minLength="12" maxLength="12" pattern="[a-z]{12}" value="{{.Letters}}" placeholder="a-z (12x, grouped by side)">
+    <input type="submit">
+    {{- end}}
+</form>
+<div style="max-height: 55vh; overflow-y: auto; font-family: monospace;" id="lbc-form-response">
+{{- block "lbc-response" .}}
+{{- range .Cheater.Words}}
+<p>{{.}}</p>
+{{- end}}
+{{- end}}
+</div>

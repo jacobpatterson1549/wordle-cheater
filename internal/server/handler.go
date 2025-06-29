@@ -8,7 +8,7 @@ import (
 	"net/http"
 )
 
-//go:embed main.html main.css wordle.html spelling_bee.html
+//go:embed main.html main.css wordle.html spelling_bee.html letter_boxed.html
 var _siteFS embed.FS
 
 type Handler struct {
@@ -20,6 +20,7 @@ type Handler struct {
 const (
 	wordlePath      = "/"
 	spellingBeePath = "/spelling-bee"
+	letterBoxedPath = "/letter-boxed"
 	htmxHeader      = "Hx-Request"
 )
 
@@ -44,6 +45,7 @@ func NewHandler(wordsText string) Handler {
 
 	mux.HandleFunc("GET "+wordlePath+"{$}", h.handleCheater(wordle_type))
 	mux.HandleFunc("GET "+spellingBeePath, h.handleCheater(spelling_bee_type))
+	mux.HandleFunc("GET "+letterBoxedPath, h.handleCheater(letter_boxed_type))
 	return h
 }
 

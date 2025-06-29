@@ -7,37 +7,66 @@ import (
 
 func TestWords(t *testing.T) {
 	tests := []struct {
-		name         string
-		wordsText    string
-		letterGroups []string
-		want         []string
+		name      string
+		wordsText string
+		lb        LetterBox
+		wantOk    bool
+		want      []string
 	}{
+		{},
 		{
-			name:         "20250622",
-			wordsText:    "zebra but fickle eat tamp puck bike left limp",
-			letterGroups: []string{"lmi", "kfa", "ecp", "utb"},
-			want:         []string{"bike", "eat", "fickle", "left", "puck", "tamp"},
+			name: "no letters",
+			lb:   LetterBox{Letters: "", BoxSideCount: 3, MinWordLength: 1},
 		},
 		{
-			name:         "two letters",
-			wordsText:    "odd dodo",
-			letterGroups: []string{"d", "o"},
-			want:         []string{"dodo"},
+			name: "bad box side count",
+			lb:   LetterBox{Letters: "abc", MinWordLength: 1},
 		},
 		{
-			name:         "duplicate letters",
-			wordsText:    "a aa aaa",
-			letterGroups: []string{"aa"},
+			name: "bad min word length",
+			lb:   LetterBox{Letters: "ham", BoxSideCount: 3, MinWordLength: -1},
 		},
 		{
-			name:         "duplicate letters across groups",
-			wordsText:    "a aa aaa",
-			letterGroups: []string{"a", "a"},
+			name: "uneven letter count",
+			lb:   LetterBox{Letters: "rats", BoxSideCount: 3, MinWordLength: 1},
+		},
+		{
+			name:      "simple",
+			wordsText: "ab cab bad",
+			lb:        LetterBox{Letters: "abc", BoxSideCount: 3, MinWordLength: 2},
+			wantOk:    true,
+			want:      []string{"ab", "cab"},
+		},
+		{
+			name:      "20250622",
+			wordsText: "zebra but fickle eat tamp puck bike left limp",
+			lb:        LetterBox{Letters: "lmikfaecputb", BoxSideCount: 4, MinWordLength: 3},
+			wantOk:    true,
+			want:      []string{"bike", "eat", "fickle", "left", "puck", "tamp"},
+		},
+		{
+			name:      "20250622",
+			wordsText: "zebra but fickle eat tamp puck bike left limp",
+			lb:        LetterBox{Letters: "lmikfaecputb", BoxSideCount: 4, MinWordLength: 3},
+			wantOk:    true,
+			want:      []string{"bike", "eat", "fickle", "left", "puck", "tamp"},
+		},
+		{
+			name:      "two letters",
+			wordsText: "odd dodo",
+			lb:        LetterBox{Letters: "do", BoxSideCount: 2, MinWordLength: 3},
+			wantOk:    true,
+			want:      []string{"dodo"},
+		},
+		{
+			name:      "duplicate letters",
+			wordsText: "a aa aaa",
+			lb:        LetterBox{Letters: "aaaa", BoxSideCount: 4, MinWordLength: 1},
 		},
 	}
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
-			got, err := Words(test.wordsText, test.letterGroups)
+			got, err := test.lb.Words(test.wordsText)
 			if err != nil {
 				if test.want != nil {
 					t.Errorf("unwanted error: %v", err)

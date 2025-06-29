@@ -54,6 +54,21 @@ func TestNewHandler(t *testing.T) {
 			target:   spellingBeePath + "-404",
 			wantCode: 404,
 		},
+		{
+			name:     "letter-boxed-empty",
+			target:   letterBoxedPath,
+			wantCode: 200,
+		},
+		{
+			name:     "letter-boxed-ok",
+			target:   letterBoxedPath + "?" + letterBoxedLettersParam + "=abcdefghijkl",
+			wantCode: 200,
+		},
+		{
+			name:     "letter-boxed-bad-count",
+			target:   letterBoxedPath + "?" + letterBoxedLettersParam + "=hello",
+			wantCode: 400,
+		},
 	}
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
@@ -118,7 +133,7 @@ func TestHandleCheaterHtmx(t *testing.T) {
 		{"all", nil, "OuterInner"},
 		{"inner only", map[string]string{htmxHeader: "true"}, "Inner"},
 	}
-	pageTypes := []pageType{wordle_type, spelling_bee_type}
+	pageTypes := []pageType{wordle_type, spelling_bee_type, letter_boxed_type}
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
 			for _, pt := range pageTypes {
