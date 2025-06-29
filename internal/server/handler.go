@@ -43,9 +43,9 @@ func NewHandler(wordsText string) Handler {
 		tmpl:      tmpl,
 	}
 
-	mux.HandleFunc("GET "+wordlePath+"{$}", wordleType.handle(h))
-	mux.HandleFunc("GET "+spellingBeePath, spellingBeeType.handle(h))
-	mux.HandleFunc("GET "+letterBoxedPath, letterBoxedType.handle(h))
+	mux.HandleFunc("GET "+wordlePath+"{$}", wordlePage.handle(h))
+	mux.HandleFunc("GET "+spellingBeePath, spellingBeePage.handle(h))
+	mux.HandleFunc("GET "+letterBoxedPath, letterBoxedPage.handle(h))
 	return h
 }
 
@@ -54,7 +54,7 @@ func (h Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		ServeHTTP(w, r)
 }
 
-func (pt pageType[C]) handle(h Handler) http.HandlerFunc {
+func (pt page[C]) handle(h Handler) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		q := r.URL.Query()
 		p, err := pt.newPage(q, h.wordsText)
