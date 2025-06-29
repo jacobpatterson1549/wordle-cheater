@@ -4,9 +4,9 @@ import "testing"
 
 func TestUniquePageTitles(t *testing.T) {
 	titles := []string{
-		wordleType.Title,
-		spellingBeeType.Title,
-		letterBoxedType.Title,
+		wordlePage.Title,
+		spellingBeePage.Title,
+		letterBoxedPage.Title,
 	}
 	m := make(map[string]struct{}, len(titles))
 	for _, title := range titles {
