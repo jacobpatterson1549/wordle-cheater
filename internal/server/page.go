@@ -1,73 +1,44 @@
 package server
 
 type (
-	Page struct {
-		NoJS bool
-		pageType
+	Page[C any] struct {
+		pageType[C]
+		NoJS    bool
 		Cheater any
 	}
-	pageType int
+	pageType[C any] struct {
+		Title            string
+		HtmxTemplateName string
+		newCheater       func(query map[string][]string, wordsText string) (*C, error)
+	}
 )
 
-const (
-	wordle_type pageType = iota
-	spelling_bee_type
-	letter_boxed_type
+var (
+	wordleType      = pageType[WordleCheater]{"Wordle Cheater", "wordle.html", NewWordleCheater}
+	spellingBeeType = pageType[SpellingBeeCheater]{"Spelling Bee Cheater", "sbc-response", NewSpellingBeeCheater}
+	letterBoxedType = pageType[LetterBoxedCheater]{"Letter Boxed Cheater", "lbc-response", NewLetterBoxedCheater}
 )
 
-func (pt pageType) newPage(query map[string][]string, wordsText string) (*Page, error) {
+func (pt pageType[C]) newPage(query map[string][]string, wordsText string) (*Page[C], error) {
 	c, err := pt.newCheater(query, wordsText)
 	if err != nil {
 		return nil, err
 	}
-	p := Page{
+	p := Page[C]{
 		pageType: pt,
 		Cheater:  c,
 	}
 	return &p, nil
 }
 
-func (pt pageType) Title() string {
-	switch pt {
-	case spelling_bee_type:
-		return "Spelling Bee Cheater"
-	case letter_boxed_type:
-		return "Letter Boxed"
-	default:
-		return "Wordle Cheater"
-	}
+func (pt pageType[C]) IsWordle() bool {
+	return pt.Title == wordleType.Title
 }
 
-func (pt pageType) newCheater(query map[string][]string, wordsText string) (any, error) {
-	switch pt {
-	case spelling_bee_type:
-		return NewSpellingBeeCheater(query, wordsText)
-	case letter_boxed_type:
-		return NewLetterBoxedCheater(query, wordsText)
-	default:
-		return NewWordleCheater(query, wordsText)
-	}
+func (pt pageType[C]) IsSpellingBee() bool {
+	return pt.Title == spellingBeeType.Title
 }
 
-func (pt pageType) HtmxTemplateName() string {
-	switch pt {
-	case spelling_bee_type:
-		return "sbc-response"
-	case letter_boxed_type:
-		return "lbc-response"
-	default:
-		return "wordle.html"
-	}
-}
-
-func (pt pageType) IsWordle() bool {
-	return pt == wordle_type
-}
-
-func (pt pageType) IsSpellingBee() bool {
-	return pt == spelling_bee_type
-}
-
-func (pt pageType) IsLetterBoxed() bool {
-	return pt == letter_boxed_type
+func (pt pageType[C]) IsLetterBoxed() bool {
+	return pt.Title == letterBoxedType.Title
 }
