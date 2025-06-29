@@ -1,4 +1,4 @@
-.PHONY: all test coverage clean
+.PHONY: all test coverage doc clean
 
 BUILD_DIR := build
 BIN_DIR := $(BUILD_DIR)/bin
@@ -18,6 +18,11 @@ test: $(BUILD_DIR)/$(COVERAGE_OBJ)
 
 coverage: $(BUILD_DIR)/$(COVERAGE_OBJ)
 	go tool cover -html=$<
+
+doc: $(BUILD_DIR)/$(COVERAGE_OBJ)
+	@echo Documentation running at http://127.0.0.1:6060/pkg/$(shell go list -m)?m=all
+	@echo Press Ctrl+C to stop
+	go run golang.org/x/tools/cmd/godoc@latest -http=:6060
 
 clean:
 	rm -rf $(BUILD_DIR)
