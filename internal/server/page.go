@@ -16,13 +16,13 @@ const (
 )
 
 func (pt pageType) newPage(query map[string][]string, wordsText string) (*Page, error) {
-	cheater, err := pt.cheater(query, wordsText)
+	c, err := pt.newCheater(query, wordsText)
 	if err != nil {
 		return nil, err
 	}
 	p := Page{
 		pageType: pt,
-		Cheater:  cheater,
+		Cheater:  c,
 	}
 	return &p, nil
 }
@@ -38,14 +38,14 @@ func (pt pageType) Title() string {
 	}
 }
 
-func (pt pageType) cheater(query map[string][]string, wordsText string) (any, error) {
+func (pt pageType) newCheater(query map[string][]string, wordsText string) (any, error) {
 	switch pt {
 	case spelling_bee_type:
-		return RunSpellingBeeCheater(query, wordsText)
+		return NewSpellingBeeCheater(query, wordsText)
 	case letter_boxed_type:
 		return NewLetterBoxedCheater(query, wordsText)
 	default:
-		return RunWordleCheater(query, wordsText)
+		return NewWordleCheater(query, wordsText)
 	}
 }
 

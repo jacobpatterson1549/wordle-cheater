@@ -162,7 +162,7 @@ func TestRunWordleCheater(t *testing.T) {
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
 			words := "forte forth forts forty"
-			got, err := RunWordleCheater(test.query, words)
+			got, err := NewWordleCheater(test.query, words)
 			switch {
 			case !test.wantOk:
 				if err == nil {
@@ -178,7 +178,7 @@ func TestRunWordleCheater(t *testing.T) {
 }
 
 func TestRunWordleCheaterBadWordsText(t *testing.T) {
-	if _, err := RunWordleCheater(map[string][]string{}, "Words"); err == nil {
+	if _, err := NewWordleCheater(map[string][]string{}, "Words"); err == nil {
 		t.Errorf("wanted error running with capitalized word")
 	}
 }
@@ -202,7 +202,7 @@ func TestRunWordleCheaterGuessCount(t *testing.T) {
 					query["s"+strconv.Itoa(i)] = []string{"nnnnn"}
 				}
 				wordsText := "xxxxa xxxxb xxxxc xxxxd xxxxe xxxxf xxxxg xxxxh xxxxi xxxxj"
-				got, err := RunWordleCheater(query, wordsText)
+				got, err := NewWordleCheater(query, wordsText)
 				switch {
 				case err != nil:
 					t.Errorf("unwanted error: %v", err)
