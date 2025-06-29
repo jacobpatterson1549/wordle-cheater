@@ -12,6 +12,7 @@ type (
 const (
 	wordle_type pageType = iota
 	spelling_bee_type
+	letter_boxed_type
 )
 
 func (pt pageType) newPage(query map[string][]string, wordsText string) (*Page, error) {
@@ -30,6 +31,8 @@ func (pt pageType) Title() string {
 	switch pt {
 	case spelling_bee_type:
 		return "Spelling Bee Cheater"
+	case letter_boxed_type:
+		return "Letter Boxed"
 	default:
 		return "Wordle Cheater"
 	}
@@ -39,6 +42,8 @@ func (pt pageType) cheater(query map[string][]string, wordsText string) (any, er
 	switch pt {
 	case spelling_bee_type:
 		return RunSpellingBeeCheater(query, wordsText)
+	case letter_boxed_type:
+		return NewLetterBoxedCheater(query, wordsText)
 	default:
 		return RunWordleCheater(query, wordsText)
 	}
@@ -48,6 +53,8 @@ func (pt pageType) HtmxTemplateName() string {
 	switch pt {
 	case spelling_bee_type:
 		return "sbc-response"
+	case letter_boxed_type:
+		return "lbc-response"
 	default:
 		return "wordle.html"
 	}
@@ -59,4 +66,8 @@ func (pt pageType) IsWordle() bool {
 
 func (pt pageType) IsSpellingBee() bool {
 	return pt == spelling_bee_type
+}
+
+func (pt pageType) IsLetterBoxed() bool {
+	return pt == letter_boxed_type
 }

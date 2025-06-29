@@ -6,17 +6,41 @@ import (
 	"strings"
 )
 
-type groups map[rune]int
+type (
+	LetterBox struct {
+		Letters       string
+		BoxSideCount  int
+		MinWordLength int
+	}
+	groups map[rune]int
+)
 
-func Words(wordsText string, letterGroups []string) ([]string, error) {
+func (lb LetterBox) Words(wordsText string) ([]string, error) {
+	letters := []rune(lb.Letters)
+	switch {
+	case len(letters) == 0:
+		return nil, nil
+	case lb.BoxSideCount <= 0:
+		return nil, fmt.Errorf("wanted positive box side count: %v", lb.BoxSideCount)
+	case lb.MinWordLength <= 0:
+		return nil, fmt.Errorf("wanted positive required word length: %v", lb.MinWordLength)
+	case len(letters)%lb.BoxSideCount != 0:
+		return nil, fmt.Errorf("letters on each side of box not equal")
+	}
 	words := strings.Fields(wordsText)
+	letterGroups := make([]string, lb.BoxSideCount)
+	k := len(letters) / lb.BoxSideCount
+	for i := range lb.BoxSideCount {
+		j := i * k
+		letterGroups[i] = string(letters[j : j+k])
+	}
 	g, err := newGroups(letterGroups)
 	if err != nil {
 		return nil, err
 	}
 	var validWords []string
 	for _, word := range words {
-		if g.allows(word) {
+		if len(word) >= lb.MinWordLength && g.allows(word) {
 			validWords = append(validWords, word)
 		}
 	}
