@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"slices"
 	"strings"
+
+	"github.com/jacobpatterson1549/wordle-cheater/internal/wordle/char_set"
 )
 
 type (
@@ -12,10 +14,27 @@ type (
 		BoxSideCount  int
 		MinWordLength int
 	}
-	groups map[rune]int
+	Result struct {
+		Words       []string
+		Connections []string
+	}
+	groups     map[rune]int
+	connection struct {
+		Word    string
+		targets char_set.CharSet
+	}
+	connectionHeap []*connection
+	solver         struct {
+		targets     char_set.CharSet
+		words       []string
+		all         []connection
+		startsWith  [26][]*connection
+		endsWith    [26][]*connection
+		targetFreqs [26]int
+	}
 )
 
-func (lb LetterBox) Words(wordsText string) ([]string, error) {
+func (lb LetterBox) words(wordsText string) ([]string, error) {
 	letters := []rune(lb.Letters)
 	switch {
 	case len(letters) == 0:
@@ -73,4 +92,16 @@ func (g groups) allows(word string) bool {
 		prevKey = currKey
 	}
 	return len(word) > 0
+}
+
+func (lb LetterBox) Solve(wordsText string) (*Result, error) {
+	// TODO: write solver, add timeout if algorithm is slow
+	words, err := lb.words(wordsText)
+	if err != nil {
+		return nil, err
+	}
+	r := Result{
+		Words: words,
+	}
+	return &r, nil
 }

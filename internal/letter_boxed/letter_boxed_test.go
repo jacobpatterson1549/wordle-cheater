@@ -66,10 +66,10 @@ func TestWords(t *testing.T) {
 	}
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
-			got, err := test.lb.Words(test.wordsText)
+			got, err := test.lb.words(test.wordsText)
 			if err != nil {
 				if test.want != nil {
-					t.Errorf("unwanted error: %v", err)
+					t.Errorf("unwanted error creating words: %v", err)
 				}
 				return
 			}
@@ -78,4 +78,10 @@ func TestWords(t *testing.T) {
 			}
 		})
 	}
+}
+
+func TestResultSolve(t *testing.T) {
+	t.Skip("TODO implement algorithm using possible words to find shortest connection of words with same start/end letter")
+	// eokmpjuarlcb => corporeal lumberjack lumber jack
+	// nvaoguihltrd => authoring graduation nodular rotunda authoring graduation nodular rotunda [could not finish building connections]
 }
