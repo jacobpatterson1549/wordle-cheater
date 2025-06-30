@@ -11,7 +11,7 @@ const (
 	letterBoxedParam = "letters"
 )
 
-func TestRunLetterBoxedCheater(t *testing.T) {
+func TestNewLetterBoxedCheater(t *testing.T) {
 	tests := []struct {
 		name      string
 		query     map[string][]string
@@ -38,7 +38,9 @@ func TestRunLetterBoxedCheater(t *testing.T) {
 				LetterBox: letter_boxed.LetterBox{
 					Letters: "eokmpjuarlcb",
 				},
-				Words: []string{"bore", "jock"},
+				Result: letter_boxed.Result{
+					Words: []string{"bore", "jock"},
+				},
 			},
 		},
 	}

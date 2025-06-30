@@ -9,8 +9,17 @@
 </form>
 <div style="max-height: 55vh; overflow-y: auto; font-family: monospace;" id="lbc-form-response">
 {{- block "lbc-response" .}}
-{{- range .Cheater.Words}}
-<p>{{.}}</p>
+{{- with .Cheater.Result}}
+{{- with .Connections}}
+<p>Connections:</p>
+<p>{{range .}}<span>{{.}} </span>{{end}}</p>
+{{- end}}
+{{- with .Words}}
+<p>Valid Words:</p>
+{{- range .}}
+<p style="padding-left: 4em;">{{.}}</p>
+{{- end}}
+{{- end}}
 {{- end}}
 {{- end}}
 </div>

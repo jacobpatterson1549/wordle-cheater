@@ -11,7 +11,7 @@ import (
 type (
 	LetterBoxedCheater struct {
 		letter_boxed.LetterBox
-		Words []string
+		letter_boxed.Result
 	}
 )
 
@@ -24,15 +24,15 @@ func NewLetterBoxedCheater(query map[string][]string, wordsText string) (*Letter
 	if err != nil {
 		return nil, fmt.Errorf("parsing params: %w", err)
 	}
-	words, err := lb.Words(wordsText)
+	r, err := lb.Connections(wordsText)
 	if err != nil {
 		return nil, fmt.Errorf("searching for words: %v", err)
 	}
 	lbc := LetterBoxedCheater{
 		LetterBox: *lb,
-		Words:     words,
+		Result:    *r,
 	}
-	slices.SortFunc(lbc.Words, lbc.sortWords)
+	slices.SortFunc(lbc.Result.Words, lbc.sortWords)
 	return &lbc, nil
 }
 

@@ -16,6 +16,25 @@ func (cs *CharSet) Add(ch rune) {
 	*cs |= cs.singleton(ch)
 }
 
+func (cs *CharSet) AddAll(s string) {
+	for _, r := range s {
+		cs.Add(r)
+	}
+}
+
+func (cs *CharSet) Remove(ch rune) {
+	if !cs.valid(ch) {
+		panic(fmt.Errorf("%c is not in a-z", ch))
+	}
+	*cs &^= cs.singleton(ch)
+}
+
+func (cs *CharSet) RemoveAll(s string) {
+	for _, r := range s {
+		cs.Remove(r)
+	}
+}
+
 // Has determines if the character is in the set
 func (cs CharSet) Has(ch rune) bool {
 	if !cs.valid(ch) {

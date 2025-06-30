@@ -56,19 +56,30 @@ func TestCharSetString(t *testing.T) {
 
 func TestCharSetBadChars(t *testing.T) {
 	badChars := []rune{'?', 'A', 'Z', ' ', '!', '`', '\n', 0, 0x7F, 0xFF}
+	actions := []struct {
+		name string
+		fn   func(cs CharSet, r rune)
+	}{
+		{"add", func(cs CharSet, r rune) { cs.Add(r) }},
+		{"remove", func(cs CharSet, r rune) { cs.Remove(r) }},
+	}
 	for i, ch := range badChars {
-		t.Run("bad-add-#"+string(rune('0'+i)), func(t *testing.T) {
-			var cs CharSet
-			if cs.Has(ch) {
-				t.Errorf("bad character 0x%x in charSet", ch)
+		t.Run("bad-#"+string(rune('0'+i)), func(t *testing.T) {
+			for _, a := range actions {
+				t.Run(a.name, func(t *testing.T) {
+					var cs CharSet
+					if cs.Has(ch) {
+						t.Errorf("bad character 0x%x in charSet", ch)
+					}
+					defer func() {
+						r := recover()
+						if _, ok := r.(error); r == nil || !ok {
+							t.Errorf("expected panic error adding bad character")
+						}
+					}()
+					a.fn(cs, ch)
+				})
 			}
-			defer func() {
-				r := recover()
-				if _, ok := r.(error); r == nil || !ok {
-					t.Errorf("expected panic error adding bad character")
-				}
-			}()
-			cs.Add(ch)
 		})
 	}
 }
@@ -92,5 +103,26 @@ func TestCharSetLength(t *testing.T) {
 				t.Errorf("wanted %v, got %v", want, got)
 			}
 		})
+	}
+}
+
+func TestCharSetAddAll(t *testing.T) {
+	var cs CharSet
+	cs.Add('a')
+	cs.AddAll("bc")
+	if want, got := 3, cs.Length(); want != got {
+		t.Errorf("wanted %v, got %v", want, got)
+	}
+}
+
+func TestCharSetRemoveAll(t *testing.T) {
+	var cs CharSet
+	cs.AddAll("abc")
+	cs.RemoveAll("ca")
+	if want, got := 1, cs.Length(); want != got {
+		t.Errorf("wanted %v, got %v", want, got)
+	}
+	if !cs.Has('b') {
+		t.Errorf("only 'b' should be left: %v", cs)
 	}
 }
