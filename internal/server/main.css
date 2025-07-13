@@ -26,4 +26,5 @@ form {
 
 input, textarea {
     max-width: 50vw;
+    box-sizing: border-box;
 }
