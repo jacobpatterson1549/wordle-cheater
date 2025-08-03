@@ -28,3 +28,7 @@ input, textarea {
     max-width: 50vw;
     box-sizing: border-box;
 }
+
+summary {
+    cursor: pointer;
+}
