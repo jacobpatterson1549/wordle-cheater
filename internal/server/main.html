@@ -5,7 +5,7 @@
 	<meta name="viewport" content="width=device-width, initial-scale=1">
 	<meta http-equiv="Content-Type" content="text/html;charset=utf-8">
 	<meta name="Description" content="a collection of word game cheating tools">
-	<title>{{.Title}}</title>
+	<title>Wordle Cheater</title>
 	<link rel="shortcut icon" href="data:image/x-icon;base64," type="image/x-icon">
 	{{- if not .NoJS}}
 	<script defer src="https://cdn.jsdelivr.net/npm/htmx.org@2.0.6/dist/htmx.min.js"></script>
@@ -16,22 +16,25 @@
 </head>
 
 <body>
-    <header>
-	<h1><a href="?">{{.Title}}</a></h1>
-	<nav>
-		{{if .IsWordle}}<span>{{else}}<a href="/">{{end}}Wordle-Cheater{{if .IsWordle}}</span>{{else}}</a>{{end}}
-		{{if .IsSpellingBee}}<span>{{else}}<a href="/spelling-bee">{{end}}Spelling-Bee-Cheater{{if .IsSpellingBee}}</span>{{else}}</a>{{end}}
-		{{if .IsLetterBoxed}}<span>{{else}}<a href="/letter-boxed">{{end}}Letter-Boxed-Cheater{{if .IsLetterBoxed}}</span>{{else}}</a>{{end}}
+	<header>
+	<h1>Wordle Cheater</h1>
+	<nav hx-boost="true" hx-target="#main-template" hx-push-url="true">
+		<a href="/{{with .NoJS}}?NoJS{{end}}">Wordle-Cheater</a>
+		<a href="/spelling-bee{{with .NoJS}}?NoJS{{end}}">Spelling-Bee-Cheater</a>
+		<a href="/letter-boxed{{with .NoJS}}?NoJS{{end}}">Letter-Boxed-Cheater</a>
 	</nav>
 	</header>
 	<main>
-		{{- if .IsWordle}}
-		{{template "wordle.html" .}}
-		{{- else if .IsSpellingBee}}
-		{{template "spelling_bee.html".}}
-		{{- else if .IsLetterBoxed}}
-		{{template "letter_boxed.html" .}}
-		{{- end}}
+		<div id="main-template">
+			<h2>{{.Title}}</h2>
+			{{- if .IsWordle}}
+			{{template "wordle.html" .}}
+			{{- else if .IsSpellingBee}}
+			{{template "spelling_bee.html".}}
+			{{- else if .IsLetterBoxed}}
+			{{template "letter_boxed.html" .}}
+			{{- end}}
+		</div>
 
 		<p>
 			{{- if .NoJS}}
@@ -41,7 +44,7 @@
 			{{- end}}
 		</p>
 	</main>
-    <footer>
+	<footer>
 		<a href="https://jacobpatterson1549.dev/">Homepage</a>
 		<a href="https://github.com/jacobpatterson1549/wordle-cheater">Github</a>
 	</footer>
