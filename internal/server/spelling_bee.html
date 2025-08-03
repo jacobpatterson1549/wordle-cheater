@@ -6,7 +6,7 @@
         minLength="1" maxLength="1" pattern="[a-z]{1}"{{- with .CentralLetter}} value='{{printf "%c" .}}'{{end}} placeholder="a-z (1x)">
     <label for="other-Letters">Other Letters:</label>
     <input id="other-letters" name="other-letters" type="text" required
-        minLength="6" maxLength="6" pattern="[a-z]{6}" value="{{.OtherLetters}}" placeholder="a-z (6x)">
+        minLength="6" maxLength="6" pattern="^(?!.*(.).*\1)[a-z]{6}$" value="{{.OtherLetters}}" placeholder="a-z (6x unique letters)">
     <input type="submit">
     {{- end}}
 </form>

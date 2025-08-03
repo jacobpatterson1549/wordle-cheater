@@ -3,7 +3,7 @@
     {{- with .Cheater}}
     <label for="letters">Letters:</label>
     <input id="letters" name="letters" type="text" required
-        minLength="12" maxLength="12" pattern="[a-z]{12}" value="{{.Letters}}" placeholder="a-z (12x, grouped by side)">
+        minLength="12" maxLength="12" pattern="^(?!.*(.).*\1)[a-z]{12}$" value="{{.Letters}}" placeholder="a-z (12x unique letters, grouped by side)">
     <input type="submit">
     {{- end}}
 </form>
