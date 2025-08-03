@@ -126,19 +126,18 @@ func TestHandleTemplateError(t *testing.T) {
 
 func TestResolveTemplate(t *testing.T) {
 	tests := []struct {
-		name             string
-		htmx             bool
-		htmxTemplateName string
-		want             string
+		name     string
+		tmplName string
+		want     string
 	}{
-		{"all", false, "", "OuterInner"},
-		{"inner only", true, "subTmpl", "Inner"},
+		{"all", "", "OuterInner"},
+		{"inner only", "subTmpl", "Inner"},
 	}
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
 			text := `Outer{{block "subTmpl" .}}Inner{{end}}`
 			tmpl := template.Must(template.New("").Parse(text))
-			tmpl = resolveTemplate(tmpl, test.htmx, test.htmxTemplateName)
+			tmpl = resolveTemplate(tmpl, test.tmplName)
 			var sb strings.Builder
 			err := tmpl.Execute(&sb, nil)
 			if err != nil {

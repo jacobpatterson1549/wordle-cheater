@@ -7,16 +7,16 @@ type (
 		Cheater any
 	}
 	page[C any] struct {
-		Title            string
-		HtmxTemplateName string
-		newCheater       func(query map[string][]string, wordsText string) (*C, error)
+		Title      string
+		tmplName   string
+		newCheater func(query map[string][]string, wordsText string) (*C, error)
 	}
 )
 
 var (
 	wordlePage      = page[WordleCheater]{"Wordle Cheater", "wordle.html", NewWordleCheater}
-	spellingBeePage = page[SpellingBeeCheater]{"Spelling Bee Cheater", "sbc-response", NewSpellingBeeCheater}
-	letterBoxedPage = page[LetterBoxedCheater]{"Letter Boxed Cheater", "lbc-response", NewLetterBoxedCheater}
+	spellingBeePage = page[SpellingBeeCheater]{"Spelling Bee Cheater", "spelling_bee.html", NewSpellingBeeCheater}
+	letterBoxedPage = page[LetterBoxedCheater]{"Letter Boxed Cheater", "letter_boxed.html", NewLetterBoxedCheater}
 )
 
 func (pt page[C]) newPage(query map[string][]string, wordsText string) (*pageDisplay[C], error) {

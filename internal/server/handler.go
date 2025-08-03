@@ -21,7 +21,6 @@ const (
 	wordlePath      = "/"
 	spellingBeePath = "/spelling-bee"
 	letterBoxedPath = "/letter-boxed"
-	htmxHeader      = "Hx-Request"
 )
 
 func NewHandler(wordsText string) Handler {
@@ -63,15 +62,17 @@ func (pt page[C]) handle(h Handler) http.HandlerFunc {
 			return
 		}
 		p.NoJS = q.Has("NoJS")
-		_, htmx := r.Header[htmxHeader]
-		tmpl := resolveTemplate(h.tmpl, htmx, p.HtmxTemplateName)
+		tmplName := r.Header.Get("Hx-Target")
+		if tmplName == "main-template" {
+			tmplName = pt.tmplName
+		}
+		tmpl := resolveTemplate(h.tmpl, tmplName)
 		handleTemplate(tmpl, w, p)
 	}
 }
 
-func resolveTemplate(tmpl *template.Template, htmx bool, htmxTemplateName string) *template.Template {
-	if htmx {
-		tmplName := htmxTemplateName
+func resolveTemplate(tmpl *template.Template, tmplName string) *template.Template {
+	if len(tmplName) > 0 {
 		tmpl = tmpl.Lookup(tmplName)
 	}
 	return tmpl
