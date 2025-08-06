@@ -1,24 +1,26 @@
 package server
 
 type (
-	pageDisplay[C any] struct {
-		page[C]
+	pageDisplay struct {
+		page
 		NoJS    bool
 		Cheater any
 	}
-	page[C any] struct {
+	page struct {
 		Title        string
 		tmplName     string
-		newCheater   func(query map[string][]string, wordsText string) (*C, error)
+		newCheater   func(query map[string][]string, wordsText string) (any, error)
 		Instructions []string
 	}
 )
 
 var (
-	wordlePage = page[WordleCheater]{
-		Title:      "Wordle Cheater",
-		tmplName:   "wordle.html",
-		newCheater: NewWordleCheater,
+	wordlePage = page{
+		Title:    "Wordle Cheater",
+		tmplName: "wordle.html",
+		newCheater: func(query map[string][]string, wordsText string) (any, error) {
+			return NewWordleCheater(query, wordsText)
+		},
 		Instructions: []string{
 			"Wordle-Cheater is a word-guessing helper.",
 			"Each guess must be five (5) letters long.",
@@ -30,10 +32,12 @@ var (
 			"Check the 'Show Possible' checkbox to see valid words after submitting another guess.",
 		},
 	}
-	spellingBeePage = page[SpellingBeeCheater]{
-		Title:      "Spelling Bee Cheater",
-		tmplName:   "spelling_bee.html",
-		newCheater: NewSpellingBeeCheater,
+	spellingBeePage = page{
+		Title:    "Spelling Bee Cheater",
+		tmplName: "spelling_bee.html",
+		newCheater: func(query map[string][]string, wordsText string) (any, error) {
+			return NewSpellingBeeCheater(query, wordsText)
+		},
 		Instructions: []string{
 			"Spelling Bee Cheater finds words that match the pattern.",
 			"The Central letter must be in each word.",
@@ -44,10 +48,12 @@ var (
 			"Words that use all the Other letters are Pangrams and get a bonus of seven (7) points.",
 		},
 	}
-	letterBoxedPage = page[LetterBoxedCheater]{
-		Title:      "Letter Boxed Cheater",
-		tmplName:   "letter_boxed.html",
-		newCheater: NewLetterBoxedCheater,
+	letterBoxedPage = page{
+		Title:    "Letter Boxed Cheater",
+		tmplName: "letter_boxed.html",
+		newCheater: func(query map[string][]string, wordsText string) (any, error) {
+			return NewLetterBoxedCheater(query, wordsText)
+		},
 		Instructions: []string{
 			"Letter Boxed Cheater lists words that can be formed by alternating letters in a box pattern.",
 			"Each side of the box has three (3) letters.",
@@ -57,26 +63,26 @@ var (
 	}
 )
 
-func (pt page[C]) newPage(query map[string][]string, wordsText string) (*pageDisplay[C], error) {
+func (pt page) newPage(query map[string][]string, wordsText string) (*pageDisplay, error) {
 	c, err := pt.newCheater(query, wordsText)
 	if err != nil {
 		return nil, err
 	}
-	p := pageDisplay[C]{
+	p := pageDisplay{
 		page:    pt,
 		Cheater: c,
 	}
 	return &p, nil
 }
 
-func (pt page[C]) IsWordle() bool {
+func (pt page) IsWordle() bool {
 	return pt.Title == wordlePage.Title
 }
 
-func (pt page[C]) IsSpellingBee() bool {
+func (pt page) IsSpellingBee() bool {
 	return pt.Title == spellingBeePage.Title
 }
 
-func (pt page[C]) IsLetterBoxed() bool {
+func (pt page) IsLetterBoxed() bool {
 	return pt.Title == letterBoxedPage.Title
 }
