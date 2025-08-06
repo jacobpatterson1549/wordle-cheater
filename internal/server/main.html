@@ -34,21 +34,6 @@
 			{{- else if .IsLetterBoxed}}
 			{{template "letter_boxed.html" .}}
 			{{- end}}
-
-			{{- define "instructions"}}
-			{{- with .Instructions}}
-			<p>
-				<details open>
-					<summary>Instructions:</summary>
-					<ul>
-						{{- range .}}
-						<li>{{.}}</li>
-						{{- end}}
-					</ul>
-				</details>
-			</p>
-			{{- end}}
-			{{- end}}
 		</div>
 
 		<p>

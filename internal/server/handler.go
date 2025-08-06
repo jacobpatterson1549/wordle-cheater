@@ -8,7 +8,7 @@ import (
 	"net/http"
 )
 
-//go:embed main.html main.css wordle.html spelling_bee.html letter_boxed.html
+//go:embed main.html main.css wordle.html spelling_bee.html letter_boxed.html instructions.html
 var _siteFS embed.FS
 
 type Handler struct {
