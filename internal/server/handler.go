@@ -29,8 +29,12 @@ func NewHandler(wordsText string) *Handler {
 	inc := func(i int) int {
 		return i + 1
 	}
+	arr := func(s ...string) []string {
+		return s
+	}
 	funcs := template.FuncMap{
 		"inc": inc,
+		"arr": arr,
 	}
 	tmpl := template.Must(newTemplate().
 		Funcs(funcs).

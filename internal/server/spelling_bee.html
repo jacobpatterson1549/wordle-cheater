@@ -40,4 +40,12 @@
 {{- end}}
 </div>
 
-{{template "instructions.html" .Instructions}}
+{{template "instructions.html" arr
+    "Spelling Bee Cheater finds words that match the pattern."
+    "The Central letter must be in each word."
+    "Words must be at least four (4) letters long."
+    "Other letters contains the list of six (6) distinct secondary letters that can be used."
+    "The score of a word is its letter count."
+    "However, short, four (4) letter words have a score of one (1)."
+    "Words that use all the Other letters are Pangrams and get a bonus of seven (7) points."
+}}

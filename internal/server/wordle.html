@@ -23,4 +23,13 @@
     {{- end}}
 </form>
 
-{{template "instructions.html" .Instructions}}
+{{template "instructions.html" arr
+    "Wordle-Cheater is a word-guessing helper."
+    "Each guess must be five (5) letters long."
+    "Letters for each guess are assigned a score:"
+    "- 'C' for correct - letter is in the word in the same position."
+    "- 'A' for almost - letter is in the word, but in a different position."
+    "- 'N' for not correct - letter is not in the word at all."
+    "Scores for guesses are cumulatively applied."
+    "Check the 'Show Possible' checkbox to see valid words after submitting another guess."
+}}
