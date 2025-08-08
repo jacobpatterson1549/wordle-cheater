@@ -1,7 +1,7 @@
 package server
 
 type (
-	pageDisplay struct {
+	display struct {
 		page
 		NoJS    bool
 		Cheater any
@@ -41,26 +41,26 @@ func wrapCheater[T any](f func(query map[string][]string, wordsText string) (T, 
 	}
 }
 
-func (pt page) newPage(query map[string][]string, wordsText string) (*pageDisplay, error) {
-	c, err := pt.newCheater(query, wordsText)
+func (p page) newDisplay(query map[string][]string, wordsText string) (*display, error) {
+	c, err := p.newCheater(query, wordsText)
 	if err != nil {
 		return nil, err
 	}
-	p := pageDisplay{
-		page:    pt,
+	d := display{
+		page:    p,
 		Cheater: c,
 	}
-	return &p, nil
+	return &d, nil
 }
 
-func (pt page) IsWordle() bool {
-	return pt.Title == wordlePage.Title
+func (p page) IsWordle() bool {
+	return p.Title == wordlePage.Title
 }
 
-func (pt page) IsSpellingBee() bool {
-	return pt.Title == spellingBeePage.Title
+func (p page) IsSpellingBee() bool {
+	return p.Title == spellingBeePage.Title
 }
 
-func (pt page) IsLetterBoxed() bool {
-	return pt.Title == letterBoxedPage.Title
+func (p page) IsLetterBoxed() bool {
+	return p.Title == letterBoxedPage.Title
 }

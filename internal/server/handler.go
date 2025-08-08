@@ -57,21 +57,21 @@ func (h *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		ServeHTTP(w, r)
 }
 
-func (h *Handler) handle(pt page) http.HandlerFunc {
+func (h *Handler) handle(p page) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		q := r.URL.Query()
-		p, err := pt.newPage(q, h.wordsText)
+		d, err := p.newDisplay(q, h.wordsText)
 		if err != nil {
 			handleBadRequest(w, "creating cheater", err)
 			return
 		}
-		p.NoJS = q.Has("NoJS")
+		d.NoJS = q.Has("NoJS")
 		tmplName := r.Header.Get("Hx-Target")
 		if tmplName == "main-template" {
-			tmplName = pt.tmplName
+			tmplName = p.tmplName
 		}
 		tmpl := resolveTemplate(h.tmpl, tmplName)
-		handleTemplate(tmpl, w, p)
+		handleTemplate(tmpl, w, d)
 	}
 }
 
