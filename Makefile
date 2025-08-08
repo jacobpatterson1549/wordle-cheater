@@ -31,9 +31,7 @@ $(BUILD_DIR) $(BIN_DIR):
 	mkdir -p $@
 
 $(BIN_DIR)/%: $(BUILD_DIR)/$(COVERAGE_OBJ)
-	go list ./... | grep -E cmd/$(@F)$$ \
-		| $(GO_ARGS) xargs go build \
-			-o $@
+	$(GO_ARGS) go build -o $@ ./cmd/$(@F)
 
 $(BUILD_DIR)/$(COVERAGE_OBJ): $(SRC) $(BUILD_DIR)/$(WORDS_OBJ) | $(BUILD_DIR)
 	go test ./... -covermode=count -coverprofile=$@
