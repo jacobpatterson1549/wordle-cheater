@@ -3,9 +3,9 @@ FROM golang:1.24-alpine3.22 AS builder
 WORKDIR /app
 COPY go.mod go.sum ./
 RUN apk add --no-cache \
-        make=~4.4.1-r3 \
-        aspell=~0.60.8.1-r0 \
         aspell-en=2020.12.07-r0 \
+        aspell=~0.60.8.1-r0 \
+        make=~4.4.1-r3 \
     && go mod download
 
 # build the server
