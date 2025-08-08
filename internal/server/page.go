@@ -15,27 +15,31 @@ type (
 
 var (
 	wordlePage = page{
-		Title:    "Wordle Cheater",
-		tmplName: "wordle.html",
-		newCheater: func(query map[string][]string, wordsText string) (any, error) {
-			return NewWordleCheater(query, wordsText)
-		},
+		Title:      "Wordle Cheater",
+		tmplName:   "wordle.html",
+		newCheater: wrapCheater(NewWordleCheater),
 	}
 	spellingBeePage = page{
-		Title:    "Spelling Bee Cheater",
-		tmplName: "spelling_bee.html",
-		newCheater: func(query map[string][]string, wordsText string) (any, error) {
-			return NewSpellingBeeCheater(query, wordsText)
-		},
+		Title:      "Spelling Bee Cheater",
+		tmplName:   "spelling_bee.html",
+		newCheater: wrapCheater(NewSpellingBeeCheater),
 	}
 	letterBoxedPage = page{
-		Title:    "Letter Boxed Cheater",
-		tmplName: "letter_boxed.html",
-		newCheater: func(query map[string][]string, wordsText string) (any, error) {
-			return NewLetterBoxedCheater(query, wordsText)
-		},
+		Title:      "Letter Boxed Cheater",
+		tmplName:   "letter_boxed.html",
+		newCheater: wrapCheater(NewLetterBoxedCheater),
 	}
 )
+
+func wrapCheater[T any](f func(query map[string][]string, wordsText string) (T, error)) func(query map[string][]string, wordsText string) (any, error) {
+	return func(query map[string][]string, wordsText string) (any, error) {
+		c, err := f(query, wordsText)
+		if err != nil {
+			return nil, err
+		}
+		return c, nil
+	}
+}
 
 func (pt page) newPage(query map[string][]string, wordsText string) (*pageDisplay, error) {
 	c, err := pt.newCheater(query, wordsText)
