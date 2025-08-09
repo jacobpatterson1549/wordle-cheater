@@ -149,3 +149,16 @@ func TestResolveTemplate(t *testing.T) {
 		})
 	}
 }
+
+func TestHandleGzip(t *testing.T) {
+	w := httptest.NewRecorder()
+	r := httptest.NewRequest("GET", "/", nil)
+	r.Header.Set("Accept-Encoding", "gzip")
+	h := NewHandler("")
+
+	h.ServeHTTP(w, r)
+
+	if enc := w.Header().Get("Content-Encoding"); enc != "gzip" {
+		t.Errorf("got: %q", enc)
+	}
+}
