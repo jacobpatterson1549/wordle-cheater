@@ -4,7 +4,6 @@ import (
 	"log"
 	"net"
 	"net/http"
-	"os"
 
 	words "github.com/jacobpatterson1549/wordle-cheater"
 	"github.com/jacobpatterson1549/wordle-cheater/cmd/server/config"
@@ -12,7 +11,7 @@ import (
 )
 
 func main() {
-	cfg, err := config.New(os.Stdout, os.LookupEnv, os.Args...)
+	cfg, err := config.New()
 	if err != nil {
 		log.Fatalf("parsing configuration: %v", err)
 	}
