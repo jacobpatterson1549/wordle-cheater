@@ -23,7 +23,7 @@ const (
 	letterBoxedPath = "/letter-boxed"
 )
 
-func NewHandler(wordsText string) *Handler {
+func NewHandler(wordsText string) http.Handler {
 	mux := http.NewServeMux()
 
 	inc := func(i int) int {
@@ -45,16 +45,11 @@ func NewHandler(wordsText string) *Handler {
 		mux:       mux,
 		tmpl:      tmpl,
 	}
-
 	mux.HandleFunc("GET "+wordlePath+"{$}", h.handle(wordlePage))
 	mux.HandleFunc("GET "+spellingBeePath, h.handle(spellingBeePage))
 	mux.HandleFunc("GET "+letterBoxedPath, h.handle(letterBoxedPage))
-	return &h
-}
 
-func (h *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	withContentEncoding(h.mux).
-		ServeHTTP(w, r)
+	return withContentEncoding(mux)
 }
 
 func (h *Handler) handle(p page) http.HandlerFunc {
