@@ -11,12 +11,6 @@ import (
 //go:embed main.html main.css wordle.html spelling_bee.html letter_boxed.html instructions.html
 var _siteFS embed.FS
 
-type Handler struct {
-	wordsText string
-	mux       http.Handler
-	tmpl      *template.Template
-}
-
 const (
 	wordlePath      = "/"
 	spellingBeePath = "/spelling-bee"
@@ -24,8 +18,6 @@ const (
 )
 
 func NewHandler(wordsText string) http.Handler {
-	mux := http.NewServeMux()
-
 	inc := func(i int) int {
 		return i + 1
 	}
@@ -37,25 +29,21 @@ func NewHandler(wordsText string) http.Handler {
 		"arr": arr,
 	}
 	tmpl := template.Must(newTemplate().
-		Funcs(funcs).
-		ParseFS(_siteFS, "*.html", "*.css"))
-
-	h := Handler{
-		wordsText: wordsText,
-		mux:       mux,
-		tmpl:      tmpl,
-	}
-	mux.HandleFunc("GET "+wordlePath+"{$}", h.handle(wordlePage))
-	mux.HandleFunc("GET "+spellingBeePath, h.handle(spellingBeePage))
-	mux.HandleFunc("GET "+letterBoxedPath, h.handle(letterBoxedPage))
+	Funcs(funcs).
+	ParseFS(_siteFS, "*.html", "*.css"))
+	
+	mux := http.NewServeMux()
+	mux.HandleFunc("GET "+wordlePath+"{$}", handle(wordlePage, wordsText, tmpl))
+	mux.HandleFunc("GET "+spellingBeePath, handle(spellingBeePage, wordsText, tmpl))
+	mux.HandleFunc("GET "+letterBoxedPath, handle(letterBoxedPage, wordsText, tmpl))
 
 	return withContentEncoding(mux)
 }
 
-func (h *Handler) handle(p page) http.HandlerFunc {
+func handle(p page, wordsText string, tmpl *template.Template) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		q := r.URL.Query()
-		d, err := p.newDisplay(q, h.wordsText)
+		d, err := p.newDisplay(q, wordsText)
 		if err != nil {
 			handleBadRequest(w, "creating cheater", err)
 			return
@@ -65,7 +53,7 @@ func (h *Handler) handle(p page) http.HandlerFunc {
 		if tmplName == "main-template" {
 			tmplName = p.tmplName
 		}
-		tmpl := resolveTemplate(h.tmpl, tmplName)
+		tmpl := resolveTemplate(tmpl, tmplName)
 		handleTemplate(tmpl, w, d)
 	}
 }
