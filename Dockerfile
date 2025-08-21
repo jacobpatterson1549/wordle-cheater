@@ -1,5 +1,5 @@
 # download go dependencies for source code
-FROM golang:1.24-alpine3.22 AS builder
+FROM golang:1.25-alpine3.22 AS builder
 WORKDIR /app
 COPY go.mod go.sum ./
 RUN apk add --no-cache \

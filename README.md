@@ -12,7 +12,10 @@ It runs until a correct guess, with a score of "ccccc" is entered.
 
 ## usage
 
-[Go 1.24](https://golang.org/dl/) is used to build the application. Version 1.17 is needed to embed the words list in the executable file.  Version 1.24 is for recent updates: security, range expressions.
+[Go 1.25](https://golang.org/dl/) is used to build the application.
+* Version 1.17 is needed to embed the words list in the executable file.
+* Version 1.24 is for recent updates: security, range expressions.
+* Version 1.25 is for simplified documentation generation.
 
 [Aspell](https://github.com/GNUAspell/aspell) is used to generate the words list.
 
