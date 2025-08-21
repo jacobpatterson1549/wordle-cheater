@@ -20,9 +20,7 @@ coverage: $(BUILD_DIR)/$(COVERAGE_OBJ)
 	go tool cover -html=$<
 
 doc: $(BUILD_DIR)/$(COVERAGE_OBJ)
-	@echo Documentation running at http://127.0.0.1:6060/pkg/$(shell go list -m)?m=all
-	@echo Press Ctrl+C to stop
-	go run golang.org/x/tools/cmd/godoc@latest -http=:6060
+	go doc -u -http
 
 clean:
 	rm -rf $(BUILD_DIR)
