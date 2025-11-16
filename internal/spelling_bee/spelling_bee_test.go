@@ -7,15 +7,15 @@ import (
 
 func TestGetScores(t *testing.T) {
 	tests := []struct {
-		name          string
-		sb            SpellingBee
+		name      string
+		sb        SpellingBee
 		wordsText string
-		want          []Word
+		want      []Word
 	}{
 		{},
 		{
-			name:          "20250621",
-			sb:            SpellingBee{CentralLetter: 'e', OtherLetters: "hcking", MinLength: 4},
+			name:      "20250621",
+			sb:        SpellingBee{CentralLetter: 'e', OtherLetters: "hcking", MinLength: 4},
 			wordsText: "stuff inching chicken checking hen nice electro",
 			want: []Word{
 				{Score: 1, Value: "nice"},
@@ -24,8 +24,8 @@ func TestGetScores(t *testing.T) {
 			},
 		},
 		{
-			name:          "trimOtherLetters",
-			sb:            SpellingBee{CentralLetter: 'f', OtherLetters: "nun"},
+			name:      "trimOtherLetters",
+			sb:        SpellingBee{CentralLetter: 'f', OtherLetters: "nun"},
 			wordsText: "fun",
 			want: []Word{
 				{Score: 6, Value: "fun", IsPangram: true},
