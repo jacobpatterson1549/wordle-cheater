@@ -25,7 +25,7 @@
 	</nav>
 	</header>
 	<main>
-		<div id="main-template">
+		<div id="main-template" hx-boost="true">
 			<h2>{{.Title}}</h2>
 			{{- if .IsWordle}}
 			{{template "wordle.html" .}}
