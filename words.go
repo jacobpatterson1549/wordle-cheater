@@ -4,6 +4,7 @@ import (
 	_ "embed"
 	"fmt"
 	"io"
+	"maps"
 	"sort"
 	"strings"
 )
@@ -35,9 +36,7 @@ func New(a string) (*Words, error) {
 // Copy creates a new, identical duplication of the words
 func (m Words) Copy() *Words {
 	m2 := make(Words, len(m))
-	for k, v := range m {
-		m2[k] = v
-	}
+	maps.Copy(m2, m)
 	return &m2
 }
 
