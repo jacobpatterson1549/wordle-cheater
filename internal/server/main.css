@@ -32,3 +32,7 @@ input, textarea {
 summary {
     cursor: pointer;
 }
+
+tbody tr td:nth-child(1) {
+	font-family: monospace;
+}
