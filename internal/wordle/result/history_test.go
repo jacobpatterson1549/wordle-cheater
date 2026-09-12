@@ -153,12 +153,12 @@ func TestHistoryMergeRequiredLetters(t *testing.T) {
 			want:               History{almostLetters: []rune{'a', 'b', 'c'}},
 		},
 		{
-			History:            History{almostLetters: []rune{'a', 'b'}},
+			almostLetters:      []rune{'a', 'b'},
 			newRequiredLetters: []rune{'a', 'a'},
 			want:               History{almostLetters: []rune{'a', 'b', 'a'}},
 		},
 		{
-			History:            History{almostLetters: []rune{'a', 'a', 'a'}},
+			almostLetters:      []rune{'a', 'a', 'a'},
 			newRequiredLetters: []rune{'a', 'a', 'b', 'b', 'c'},
 			want:               History{almostLetters: []rune{'a', 'a', 'a', 'b', 'b', 'c'}}, // this will prohibit all words
 		},
@@ -203,38 +203,34 @@ func TestHistoryAllowsWord(t *testing.T) {
 		}{
 			{
 				name: `result{guess:"treat",score:"nannc"}`,
-				History: History{
-					correctLetters: [numLetters]rune{
-						4: 't',
-					},
-					almostLetters: []rune{'r', 't'},
-					prohibitedLetters: [numLetters]char_set.CharSet{
-						newCharSetHelper(t, 't', 'e', 'a'),
-						newCharSetHelper(t, 't', 'e', 'a', 'r'),
-						newCharSetHelper(t, 't', 'e', 'a'),
-						newCharSetHelper(t, 't', 'e', 'a'),
-						newCharSetHelper(t, 't', 'e', 'a'),
-					},
+				correctLetters: [numLetters]rune{
+					4: 't',
+				},
+				almostLetters: []rune{'r', 't'},
+				prohibitedLetters: [numLetters]char_set.CharSet{
+					newCharSetHelper(t, 't', 'e', 'a'),
+					newCharSetHelper(t, 't', 'e', 'a', 'r'),
+					newCharSetHelper(t, 't', 'e', 'a'),
+					newCharSetHelper(t, 't', 'e', 'a'),
+					newCharSetHelper(t, 't', 'e', 'a'),
 				},
 				word: "robot",
 				want: true,
 			},
 			{
 				name: `result{guess:"shove",score: "accnc"}`,
-				History: History{
-					correctLetters: [numLetters]rune{
-						1: 'h',
-						2: 'o',
-						4: 'e',
-					},
-					almostLetters: []rune{'s', 'h', 'o', 'e'},
-					prohibitedLetters: [numLetters]char_set.CharSet{
-						newCharSetHelper(t, 's', 'v'),
-						newCharSetHelper(t, 'v'),
-						newCharSetHelper(t, 'v'),
-						newCharSetHelper(t, 'v'),
-						newCharSetHelper(t, 'v'),
-					},
+				correctLetters: [numLetters]rune{
+					1: 'h',
+					2: 'o',
+					4: 'e',
+				},
+				almostLetters: []rune{'s', 'h', 'o', 'e'},
+				prohibitedLetters: [numLetters]char_set.CharSet{
+					newCharSetHelper(t, 's', 'v'),
+					newCharSetHelper(t, 'v'),
+					newCharSetHelper(t, 'v'),
+					newCharSetHelper(t, 'v'),
+					newCharSetHelper(t, 'v'),
 				},
 				word: "holes",
 				want: false,
