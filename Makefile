@@ -4,6 +4,8 @@ BUILD_DIR := build
 BIN_DIR := $(BUILD_DIR)/bin
 COVERAGE_OBJ := coverage.out
 WORDS_OBJ := words.txt
+WORDS_LOWERCASE_OBJ := _words_lowercase.txt
+WORDS_ALL_OBJ := _words_all.txt
 SRC := *.go
 GO_SRC_FN = find $(1) $(foreach g,$(GENERATE_SRC),-path $g -prune -o) -print 
 SRC := $(shell $(call GO_SRC_FN,cmd/ internal/ *.go))
@@ -34,10 +36,12 @@ $(BIN_DIR)/%: $(BUILD_DIR)/$(COVERAGE_OBJ)
 $(BUILD_DIR)/$(COVERAGE_OBJ): $(SRC) $(BUILD_DIR)/$(WORDS_OBJ) | $(BUILD_DIR)
 	go test ./... -covermode=count -coverprofile=$@
 
-$(BUILD_DIR)/$(WORDS_OBJ): | $(BUILD_DIR)
-	aspell -d en_US dump master \
-		| sort \
-		| uniq \
-		| grep -E ^[a-z]+$$ \
-		> $@
+$(BUILD_DIR)/$(WORDS_OBJ): $(BUILD_DIR)/$(WORDS_LOWERCASE_OBJ)
+	sort -u $< > $@
+
+$(BUILD_DIR)/$(WORDS_LOWERCASE_OBJ): $(BUILD_DIR)/$(WORDS_ALL_OBJ)
+	grep -E ^[a-z]+$$ $< > $@
+
+$(BUILD_DIR)/$(WORDS_ALL_OBJ): | $(BUILD_DIR)
+	aspell -d en_US dump master > $@
 
