@@ -18,14 +18,14 @@
 <body>
 	<header>
 	<h1>Wordle Cheater</h1>
-	<nav hx-boost="true" hx-target="#main-template" hx-push-url="true">
+	<nav data-hx-boost="true" data-hx-target="#main-template" data-hx-push-url="true">
 		<a href="/{{with .NoJS}}?NoJS{{end}}">Wordle-Cheater</a>
 		<a href="/spelling-bee{{with .NoJS}}?NoJS{{end}}">Spelling-Bee-Cheater</a>
 		<a href="/letter-boxed{{with .NoJS}}?NoJS{{end}}">Letter-Boxed-Cheater</a>
 	</nav>
 	</header>
 	<main>
-		<div id="main-template" hx-boost="true">
+		<div id="main-template" data-hx-boost="true">
 			<h2>{{.Title}}</h2>
 			{{- if .IsWordle}}
 			{{template "wordle.html" .}}
