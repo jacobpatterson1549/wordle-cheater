@@ -1,4 +1,4 @@
-<form method="get" hx-target="#wc-form-response" id="wc-form-response">
+<form method="get" data-hx-target="#wc-form-response" id="wc-form-response">
     <input hidden name="NoJS" type="checkbox" {{if .NoJS}}checked{{end}}>
     {{- block "wc-form-response" .}}
     {{- with .Cheater}}
