@@ -1,12 +1,12 @@
 <form method="get" hx-target="#sbc-form-response">
-    <input hidden name="NoJS" type="checkbox" {{- if .NoJS}}checked{{end}}>
+    <input hidden name="NoJS" type="checkbox" {{if .NoJS}}checked{{end}}>
     {{- with .Cheater}}
-    <label for="central-Letter">Central Letter:</label>
+    <label for="central-letter">Central Letter:</label>
     <input id="central-letter" name="central-letter" type="text" required
-        minLength="1" maxLength="1" pattern="[a-z]{1}"{{- with .CentralLetter}} value='{{printf "%c" .}}'{{end}} placeholder="a-z (1x)">
-    <label for="other-Letters">Other Letters:</label>
+        minlength="1" maxlength="1" pattern="[a-z]{1}" {{with .CentralLetter}} value='{{printf "%c" .}}'{{end}} placeholder="a-z (1x)">
+    <label for="other-letters">Other Letters:</label>
     <input id="other-letters" name="other-letters" type="text" required
-        minLength="6" maxLength="6" pattern="^(?!.*(.).*\1)[a-z]{6}$" value="{{.OtherLetters}}" placeholder="a-z (6x unique letters)">
+        minlength="6" maxlength="6" pattern="^(?!.*(.).*\1)[a-z]{6}$" value="{{.OtherLetters}}" placeholder="a-z (6x unique letters)">
     <input type="submit">
     {{- end}}
 </form>
@@ -17,9 +17,11 @@
 <table>
     <caption>Word Details</caption>
     <thead>
-        <th>Word</th>
-        <th>Score</th>
-        <th>Details</th>
+        <tr>
+            <th>Word</th>
+            <th>Score</th>
+            <th>Details</th>
+        </tr>
     </thead>
     {{- range .Words}}
     <tr>
@@ -29,12 +31,13 @@
     </tr>
     {{- end}}
     <tfoot>
-        <th>{{len .Words}} Words</th>
-        <th>{{.TotalScore}} Total Score</th>
-        <th>{{with .PangramCount}}{{.}} Pangrams{{end}}</th>
+        <tr>
+            <th>{{len .Words}} Words</th>
+            <th>{{.TotalScore}} Total Score</th>
+            <th>{{with .PangramCount}}{{.}} Pangrams{{end}}</th>
+        </tr>
     </tfoot>
 </table>
-</div>
 {{- end}}
 {{- end}}
 {{- end}}

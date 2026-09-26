@@ -1,9 +1,9 @@
 <form method="get" hx-target="#lbc-form-response">
-    <input hidden name="NoJS" type="checkbox" {{- if .NoJS}}checked{{end}}>
+    <input hidden name="NoJS" type="checkbox" {{if .NoJS}}checked{{end}}>
     {{- with .Cheater}}
     <label for="letters">Letters:</label>
     <input id="letters" name="letters" type="text" required
-        minLength="12" maxLength="12" pattern="^(?!.*(.).*\1)[a-z]{12}$" value="{{.Letters}}" placeholder="a-z (12x unique letters, grouped by side)">
+        minlength="12" maxlength="12" pattern="^(?!.*(.).*\1)[a-z]{12}$" value="{{.Letters}}" placeholder="a-z (12x unique letters, grouped by side)">
     <input type="submit">
     {{- end}}
 </form>
