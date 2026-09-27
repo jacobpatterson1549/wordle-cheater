@@ -18,9 +18,9 @@
     <caption>Word Details</caption>
     <thead>
         <tr>
-            <th>Word</th>
-            <th>Score</th>
-            <th>Details</th>
+            <th scope="col">Word</th>
+            <th scope="col">Score</th>
+            <th scope="col">Details</th>
         </tr>
     </thead>
     <tbody>
@@ -34,9 +34,9 @@
     </tbody>
     <tfoot>
         <tr>
-            <th>{{len .Words}} Words</th>
-            <th>{{.TotalScore}} Total Score</th>
-            <th>{{with .PangramCount}}{{.}} Pangrams{{end}}</th>
+            <th scope="col">{{len .Words}} Words</th>
+            <th scope="col">{{.TotalScore}} Total Score</th>
+            <th scope="col">{{with .PangramCount}}{{.}} Pangrams{{end}}</th>
         </tr>
     </tfoot>
 </table>
