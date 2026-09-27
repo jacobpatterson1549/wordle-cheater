@@ -23,13 +23,15 @@
             <th>Details</th>
         </tr>
     </thead>
+    <tbody>
     {{- range .Words}}
-    <tr>
-        <td>{{.Value}}</td>
-        <td>{{.Score}}</td>
-        <td>{{.Details}}</td>
-    </tr>
+        <tr>
+            <td>{{.Value}}</td>
+            <td>{{.Score}}</td>
+            <td>{{.Details}}</td>
+        </tr>
     {{- end}}
+    </tbody>
     <tfoot>
         <tr>
             <th>{{len .Words}} Words</th>
